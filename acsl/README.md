@@ -78,19 +78,21 @@ frama-c file.c -wp -wp-prover why3:z3
 `libraries` contains the annotations for several common C libraries. To enable them while using Frama-C, provide it the following arguments:
 
 ```
-frama-c ... -no-frama-c-stdlib -cpp-extra-args="''library-includes'' -D__FC_MACHDEP_X86_64"
+frama-c ... -no-frama-c-stdlib -cpp-extra-args="<library-includes> -D__FC_MACHDEP_X86_64"
 ```
 
-Where ''library-includes'' are like so, one for each include:
+Where `<library-includes>` are like so, one for each include:
 
 ```
--I''path-to-this-repository''/acsl/libraries/''library-name''/include
+-I<path-to-this-repository>/acsl/libraries/<library-name>/include
 ```
+
+Where `<path-to-this-repository>` is the path to this repository, and `<library-name>` is the library you need.
 
 For example, if you wanted to use our annotations for libc to prove `file.c` using WP, and this repository was in your home directory, you would do this:
 
 ```
-frama-c file.c -wp -no-frama-c-stdlib -cpp-extra-args="-I~/acsl/libraries/libc/include -D__FC_MACHDEP_X86_64"
+frama-c file.c -wp -no-frama-c-stdlib -cpp-extra-args="-I~/annotationsforall/acsl/libraries/libc/include -D__FC_MACHDEP_X86_64"
 ```
 
 # Testing ACSL Annotations
