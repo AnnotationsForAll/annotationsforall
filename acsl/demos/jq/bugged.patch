@@ -1,0 +1,1385 @@
+From 0da4de4f413b181ce8f53ca7e15e15f58ecf4a75 Mon Sep 17 00:00:00 2001
+From: Joshua Robbins <crazybonesj@yahoo.com>
+Date: Tue, 6 Sep 2016 14:59:43 +0000
+Subject: [PATCH] add ACSL annotations
+
+---
+ .gitattributes                                     |   0
+ .gitignore                                         |   0
+ .travis.yml                                        |   0
+ AUTHORS                                            |   0
+ COPYING                                            |   0
+ ChangeLog                                          |   0
+ Dockerfile                                         |   0
+ Makefile.am                                        |   0
+ NEWS                                               |   0
+ README.md                                          |   0
+ build/.gitignore                                   |   0
+ builtin.c                                          |   0
+ builtin.h                                          |   0
+ bytecode.c                                         |   0
+ bytecode.h                                         |   0
+ compile.c                                          |   0
+ compile.h                                          |   0
+ config/.gitignore                                  |   0
+ config/m4/.gitignore                               |   0
+ config/m4/check-math-func.m4                       |   0
+ config/m4/find-func-no-libs.m4                     |   0
+ config/m4/find-func-no-libs2.m4                    |   0
+ config/m4/find-func.m4                             |   0
+ config/m4/misc.m4                                  |   0
+ configure.ac                                       |   0
+ docs/.gitignore                                    |   0
+ docs/Gemfile                                       |   0
+ docs/Gemfile.lock                                  |   0
+ docs/README.md                                     |   0
+ docs/Rakefile                                      |   0
+ docs/content/1.tutorial/default.yml                |   0
+ docs/content/2.download/default.yml                |   0
+ docs/content/3.manual/manual.yml                   |   0
+ docs/content/3.manual/v1.3/manual.yml              |   0
+ docs/content/3.manual/v1.4/manual.yml              |   0
+ docs/content/index/index.yml                       |   0
+ docs/default_manpage.md                            |   0
+ docs/public/.htaccess                              |   0
+ docs/public/bootstrap/css/bootstrap-responsive.css |   0
+ .../bootstrap/css/bootstrap-responsive.min.css     |   0
+ docs/public/bootstrap/css/bootstrap.css            |   0
+ docs/public/bootstrap/css/bootstrap.min.css        |   0
+ .../bootstrap/img/glyphicons-halflings-white.png   | Bin
+ docs/public/bootstrap/img/glyphicons-halflings.png | Bin
+ docs/public/bootstrap/js/bootstrap.js              |   0
+ docs/public/bootstrap/js/bootstrap.min.js          |   0
+ docs/public/css/base.scss                          |   0
+ docs/public/jq.png                                 | Bin
+ docs/public/robots.txt                             |   0
+ docs/site.yml                                      |   0
+ docs/templates/default.liquid                      |   0
+ docs/templates/index.liquid                        |   0
+ docs/templates/manual.liquid                       |   0
+ docs/templates/shared/_footer.liquid               |   0
+ docs/templates/shared/_head.liquid                 |   0
+ docs/templates/shared/_header.liquid               |   0
+ exec_stack.h                                       |   0
+ execute.c                                          |   0
+ inject_errors.c                                    |   0
+ jq.1.default                                       |   0
+ jq.1.prebuilt                                      |   0
+ jq.h                                               |   0
+ jq.spec                                            |   0
+ jq_parser.h                                        |   0
+ jq_test.c                                          |   0
+ jv.c                                               |   0
+ jv.h                                               | 428 ++++++++++++++++++---
+ jv_alloc.c                                         |   0
+ jv_alloc.h                                         |   0
+ jv_aux.c                                           | 189 ++++++++-
+ jv_dtoa.c                                          |   0
+ jv_dtoa.h                                          |   0
+ jv_file.c                                          |   0
+ jv_parse.c                                         |   0
+ jv_print.c                                         |   0
+ jv_unicode.c                                       |   0
+ jv_unicode.h                                       |   0
+ jv_utf8_tables.h                                   |   0
+ lexer.c                                            |   0
+ lexer.h                                            |   0
+ lexer.l                                            |   0
+ libm.h                                             |   0
+ linker.c                                           |   0
+ linker.h                                           |   0
+ locfile.c                                          |   0
+ locfile.h                                          |   0
+ m4/ax_compare_version.m4                           |   0
+ m4/ax_prog_bison_version.m4                        |   0
+ main.c                                             |   0
+ opcode_list.h                                      |   0
+ parser.c                                           |   0
+ parser.h                                           |   0
+ parser.y                                           |   0
+ scripts/gen_utf8_tables.py                         |   0
+ sha1sum.txt                                        |   0
+ tests/jq.test                                      |   0
+ tests/modules/.jq                                  |   0
+ tests/modules/a.jq                                 |   0
+ tests/modules/b/b.jq                               |   0
+ tests/modules/c/c.jq                               |   0
+ tests/modules/c/d.jq                               |   0
+ tests/modules/data.json                            |   0
+ tests/modules/lib/jq/e/e.jq                        |   0
+ tests/modules/lib/jq/f.jq                          |   0
+ tests/modules/syntaxerror/syntaxerror.jq           |   0
+ tests/modules/test_bind_order.jq                   |   0
+ tests/modules/test_bind_order0.jq                  |   0
+ tests/modules/test_bind_order1.jq                  |   0
+ tests/modules/test_bind_order2.jq                  |   0
+ tests/onig.supp                                    |   0
+ tests/onig.test                                    |   0
+ tests/torture/input0.json                          |   0
+ util.c                                             |   0
+ util.h                                             |   0
+ 114 files changed, 557 insertions(+), 60 deletions(-)
+ mode change 100644 => 100755 .gitattributes
+ mode change 100644 => 100755 .gitignore
+ mode change 100644 => 100755 .travis.yml
+ mode change 100644 => 100755 AUTHORS
+ mode change 100644 => 100755 COPYING
+ mode change 100644 => 100755 ChangeLog
+ mode change 100644 => 100755 Dockerfile
+ mode change 100644 => 100755 Makefile.am
+ mode change 100644 => 100755 NEWS
+ mode change 100644 => 100755 README.md
+ mode change 100644 => 100755 build/.gitignore
+ mode change 100644 => 100755 builtin.c
+ mode change 100644 => 100755 builtin.h
+ mode change 100644 => 100755 bytecode.c
+ mode change 100644 => 100755 bytecode.h
+ mode change 100644 => 100755 compile.c
+ mode change 100644 => 100755 compile.h
+ mode change 100644 => 100755 config/.gitignore
+ mode change 100644 => 100755 config/m4/.gitignore
+ mode change 100644 => 100755 config/m4/check-math-func.m4
+ mode change 100644 => 100755 config/m4/find-func-no-libs.m4
+ mode change 100644 => 100755 config/m4/find-func-no-libs2.m4
+ mode change 100644 => 100755 config/m4/find-func.m4
+ mode change 100644 => 100755 config/m4/misc.m4
+ mode change 100644 => 100755 configure.ac
+ mode change 100644 => 100755 docs/.gitignore
+ mode change 100644 => 100755 docs/Gemfile
+ mode change 100644 => 100755 docs/Gemfile.lock
+ mode change 100644 => 100755 docs/README.md
+ mode change 100644 => 100755 docs/Rakefile
+ mode change 100644 => 100755 docs/content/1.tutorial/default.yml
+ mode change 100644 => 100755 docs/content/2.download/default.yml
+ mode change 100644 => 100755 docs/content/3.manual/manual.yml
+ mode change 100644 => 100755 docs/content/3.manual/v1.3/manual.yml
+ mode change 100644 => 100755 docs/content/3.manual/v1.4/manual.yml
+ mode change 100644 => 100755 docs/content/index/index.yml
+ mode change 100644 => 100755 docs/default_manpage.md
+ mode change 100644 => 100755 docs/public/.htaccess
+ mode change 100644 => 100755 docs/public/bootstrap/css/bootstrap-responsive.css
+ mode change 100644 => 100755 docs/public/bootstrap/css/bootstrap-responsive.min.css
+ mode change 100644 => 100755 docs/public/bootstrap/css/bootstrap.css
+ mode change 100644 => 100755 docs/public/bootstrap/css/bootstrap.min.css
+ mode change 100644 => 100755 docs/public/bootstrap/img/glyphicons-halflings-white.png
+ mode change 100644 => 100755 docs/public/bootstrap/img/glyphicons-halflings.png
+ mode change 100644 => 100755 docs/public/bootstrap/js/bootstrap.js
+ mode change 100644 => 100755 docs/public/bootstrap/js/bootstrap.min.js
+ mode change 100644 => 100755 docs/public/css/base.scss
+ mode change 100644 => 100755 docs/public/jq.png
+ mode change 100644 => 100755 docs/public/robots.txt
+ mode change 100644 => 100755 docs/site.yml
+ mode change 100644 => 100755 docs/templates/default.liquid
+ mode change 100644 => 100755 docs/templates/index.liquid
+ mode change 100644 => 100755 docs/templates/manual.liquid
+ mode change 100644 => 100755 docs/templates/shared/_footer.liquid
+ mode change 100644 => 100755 docs/templates/shared/_head.liquid
+ mode change 100644 => 100755 docs/templates/shared/_header.liquid
+ mode change 100644 => 100755 exec_stack.h
+ mode change 100644 => 100755 execute.c
+ mode change 100644 => 100755 inject_errors.c
+ mode change 100644 => 100755 jq.1.default
+ mode change 100644 => 100755 jq.1.prebuilt
+ mode change 100644 => 100755 jq.h
+ mode change 100644 => 100755 jq.spec
+ mode change 100644 => 100755 jq_parser.h
+ mode change 100644 => 100755 jq_test.c
+ mode change 100644 => 100755 jv.c
+ mode change 100644 => 100755 jv.h
+ mode change 100644 => 100755 jv_alloc.c
+ mode change 100644 => 100755 jv_alloc.h
+ mode change 100644 => 100755 jv_aux.c
+ mode change 100644 => 100755 jv_dtoa.c
+ mode change 100644 => 100755 jv_dtoa.h
+ mode change 100644 => 100755 jv_file.c
+ mode change 100644 => 100755 jv_parse.c
+ mode change 100644 => 100755 jv_print.c
+ mode change 100644 => 100755 jv_unicode.c
+ mode change 100644 => 100755 jv_unicode.h
+ mode change 100644 => 100755 jv_utf8_tables.h
+ mode change 100644 => 100755 lexer.c
+ mode change 100644 => 100755 lexer.h
+ mode change 100644 => 100755 lexer.l
+ mode change 100644 => 100755 libm.h
+ mode change 100644 => 100755 linker.c
+ mode change 100644 => 100755 linker.h
+ mode change 100644 => 100755 locfile.c
+ mode change 100644 => 100755 locfile.h
+ mode change 100644 => 100755 m4/ax_compare_version.m4
+ mode change 100644 => 100755 m4/ax_prog_bison_version.m4
+ mode change 100644 => 100755 main.c
+ mode change 100644 => 100755 opcode_list.h
+ mode change 100644 => 100755 parser.c
+ mode change 100644 => 100755 parser.h
+ mode change 100644 => 100755 parser.y
+ mode change 100644 => 100755 scripts/gen_utf8_tables.py
+ mode change 100644 => 100755 sha1sum.txt
+ mode change 100644 => 100755 tests/jq.test
+ mode change 100644 => 100755 tests/modules/.jq
+ mode change 100644 => 100755 tests/modules/a.jq
+ mode change 100644 => 100755 tests/modules/b/b.jq
+ mode change 100644 => 100755 tests/modules/c/c.jq
+ mode change 100644 => 100755 tests/modules/c/d.jq
+ mode change 100644 => 100755 tests/modules/data.json
+ mode change 100644 => 100755 tests/modules/lib/jq/e/e.jq
+ mode change 100644 => 100755 tests/modules/lib/jq/f.jq
+ mode change 100644 => 100755 tests/modules/syntaxerror/syntaxerror.jq
+ mode change 100644 => 100755 tests/modules/test_bind_order.jq
+ mode change 100644 => 100755 tests/modules/test_bind_order0.jq
+ mode change 100644 => 100755 tests/modules/test_bind_order1.jq
+ mode change 100644 => 100755 tests/modules/test_bind_order2.jq
+ mode change 100644 => 100755 tests/onig.supp
+ mode change 100644 => 100755 tests/onig.test
+ mode change 100644 => 100755 tests/torture/input0.json
+ mode change 100644 => 100755 util.c
+ mode change 100644 => 100755 util.h
+
+diff --git a/.gitattributes b/.gitattributes
+old mode 100644
+new mode 100755
+diff --git a/.gitignore b/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/.travis.yml b/.travis.yml
+old mode 100644
+new mode 100755
+diff --git a/AUTHORS b/AUTHORS
+old mode 100644
+new mode 100755
+diff --git a/COPYING b/COPYING
+old mode 100644
+new mode 100755
+diff --git a/ChangeLog b/ChangeLog
+old mode 100644
+new mode 100755
+diff --git a/Dockerfile b/Dockerfile
+old mode 100644
+new mode 100755
+diff --git a/Makefile.am b/Makefile.am
+old mode 100644
+new mode 100755
+diff --git a/NEWS b/NEWS
+old mode 100644
+new mode 100755
+diff --git a/README.md b/README.md
+old mode 100644
+new mode 100755
+diff --git a/build/.gitignore b/build/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/builtin.c b/builtin.c
+old mode 100644
+new mode 100755
+diff --git a/builtin.h b/builtin.h
+old mode 100644
+new mode 100755
+diff --git a/bytecode.c b/bytecode.c
+old mode 100644
+new mode 100755
+diff --git a/bytecode.h b/bytecode.h
+old mode 100644
+new mode 100755
+diff --git a/compile.c b/compile.c
+old mode 100644
+new mode 100755
+diff --git a/compile.h b/compile.h
+old mode 100644
+new mode 100755
+diff --git a/config/.gitignore b/config/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/config/m4/.gitignore b/config/m4/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/config/m4/check-math-func.m4 b/config/m4/check-math-func.m4
+old mode 100644
+new mode 100755
+diff --git a/config/m4/find-func-no-libs.m4 b/config/m4/find-func-no-libs.m4
+old mode 100644
+new mode 100755
+diff --git a/config/m4/find-func-no-libs2.m4 b/config/m4/find-func-no-libs2.m4
+old mode 100644
+new mode 100755
+diff --git a/config/m4/find-func.m4 b/config/m4/find-func.m4
+old mode 100644
+new mode 100755
+diff --git a/config/m4/misc.m4 b/config/m4/misc.m4
+old mode 100644
+new mode 100755
+diff --git a/configure.ac b/configure.ac
+old mode 100644
+new mode 100755
+diff --git a/docs/.gitignore b/docs/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/docs/Gemfile b/docs/Gemfile
+old mode 100644
+new mode 100755
+diff --git a/docs/Gemfile.lock b/docs/Gemfile.lock
+old mode 100644
+new mode 100755
+diff --git a/docs/README.md b/docs/README.md
+old mode 100644
+new mode 100755
+diff --git a/docs/Rakefile b/docs/Rakefile
+old mode 100644
+new mode 100755
+diff --git a/docs/content/1.tutorial/default.yml b/docs/content/1.tutorial/default.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/content/2.download/default.yml b/docs/content/2.download/default.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/content/3.manual/manual.yml b/docs/content/3.manual/manual.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/content/3.manual/v1.3/manual.yml b/docs/content/3.manual/v1.3/manual.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/content/3.manual/v1.4/manual.yml b/docs/content/3.manual/v1.4/manual.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/content/index/index.yml b/docs/content/index/index.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/default_manpage.md b/docs/default_manpage.md
+old mode 100644
+new mode 100755
+diff --git a/docs/public/.htaccess b/docs/public/.htaccess
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/css/bootstrap-responsive.css b/docs/public/bootstrap/css/bootstrap-responsive.css
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/css/bootstrap-responsive.min.css b/docs/public/bootstrap/css/bootstrap-responsive.min.css
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/css/bootstrap.css b/docs/public/bootstrap/css/bootstrap.css
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/css/bootstrap.min.css b/docs/public/bootstrap/css/bootstrap.min.css
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/img/glyphicons-halflings-white.png b/docs/public/bootstrap/img/glyphicons-halflings-white.png
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/img/glyphicons-halflings.png b/docs/public/bootstrap/img/glyphicons-halflings.png
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/js/bootstrap.js b/docs/public/bootstrap/js/bootstrap.js
+old mode 100644
+new mode 100755
+diff --git a/docs/public/bootstrap/js/bootstrap.min.js b/docs/public/bootstrap/js/bootstrap.min.js
+old mode 100644
+new mode 100755
+diff --git a/docs/public/css/base.scss b/docs/public/css/base.scss
+old mode 100644
+new mode 100755
+diff --git a/docs/public/jq.png b/docs/public/jq.png
+old mode 100644
+new mode 100755
+diff --git a/docs/public/robots.txt b/docs/public/robots.txt
+old mode 100644
+new mode 100755
+diff --git a/docs/site.yml b/docs/site.yml
+old mode 100644
+new mode 100755
+diff --git a/docs/templates/default.liquid b/docs/templates/default.liquid
+old mode 100644
+new mode 100755
+diff --git a/docs/templates/index.liquid b/docs/templates/index.liquid
+old mode 100644
+new mode 100755
+diff --git a/docs/templates/manual.liquid b/docs/templates/manual.liquid
+old mode 100644
+new mode 100755
+diff --git a/docs/templates/shared/_footer.liquid b/docs/templates/shared/_footer.liquid
+old mode 100644
+new mode 100755
+diff --git a/docs/templates/shared/_head.liquid b/docs/templates/shared/_head.liquid
+old mode 100644
+new mode 100755
+diff --git a/docs/templates/shared/_header.liquid b/docs/templates/shared/_header.liquid
+old mode 100644
+new mode 100755
+diff --git a/exec_stack.h b/exec_stack.h
+old mode 100644
+new mode 100755
+diff --git a/execute.c b/execute.c
+old mode 100644
+new mode 100755
+diff --git a/inject_errors.c b/inject_errors.c
+old mode 100644
+new mode 100755
+diff --git a/jq.1.default b/jq.1.default
+old mode 100644
+new mode 100755
+diff --git a/jq.1.prebuilt b/jq.1.prebuilt
+old mode 100644
+new mode 100755
+diff --git a/jq.h b/jq.h
+old mode 100644
+new mode 100755
+diff --git a/jq.spec b/jq.spec
+old mode 100644
+new mode 100755
+diff --git a/jq_parser.h b/jq_parser.h
+old mode 100644
+new mode 100755
+diff --git a/jq_test.c b/jq_test.c
+old mode 100644
+new mode 100755
+diff --git a/jv.c b/jv.c
+old mode 100644
+new mode 100755
+diff --git a/jv.h b/jv.h
+old mode 100644
+new mode 100755
+index 5de3b63..d1a8870
+--- a/jv.h
++++ b/jv.h
+@@ -16,7 +16,8 @@ typedef enum {
+   JV_KIND_OBJECT
+ } jv_kind;
+ 
+-struct jv_refcnt;
++//Note: Had to add a member to this struct to make frama-c function correctly
++struct jv_refcnt {void* dummy;};
+ 
+ /* All of the fields of this struct are private.
+    Really. Do not play with them. */
+@@ -31,48 +32,265 @@ typedef struct {
+   } u;
+ } jv;
+ 
++/*@
++axiomatic JvRefcount {
++    logic integer jv_refcount{L}(struct jv_refcnt* p) reads \at(*p, L);
++}
++@*/
++
++//@ ghost void* _jv_heap;
++
+ /*
+  * All jv_* functions consume (decref) input and produce (incref) output
+  * Except jv_copy
+  */
+ 
+-jv_kind jv_get_kind(jv);
+-const char* jv_kind_name(jv_kind);
++/*@
++assigns \result \from j;
++ensures \valid(j.u.ptr);
++@*/
++jv_kind jv_get_kind(jv j);
++
++/*@
++assigns \result \from j;
++ensures \valid(\result);
++@*/
++const char* jv_kind_name(jv_kind j);
++
++/*@
++assigns \result \from x;
++@*/
+ static int jv_is_valid(jv x) { return jv_get_kind(x) != JV_KIND_INVALID; }
+ 
+-jv jv_copy(jv);
+-void jv_free(jv);
+-
+-int jv_get_refcnt(jv);
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++assigns \result, *j.u.ptr, *\result.u.ptr \from j, *j.u.ptr;
++ensures \valid(j.u.ptr);
++ensures jv_refcount{Post}(j.u.ptr) > 0;
++ensures jv_refcount{Post}(j.u.ptr) == jv_refcount{Pre}(j.u.ptr) + 1;
++ensures \result == j;
++ensures \forall struct jv_refcnt* p; p != j.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_copy(jv j);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++assigns *j.u.ptr \from *j.u.ptr;
++ensures \valid(j.u.ptr);
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j.u.ptr) == jv_refcount{Pre}(j.u.ptr) - 1;
++ensures \forall struct jv_refcnt* p; p != j.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++void jv_free(jv j);
++
++/*@
++assigns \result \from j;
++@*/
++int jv_get_refcnt(jv j);
+ 
+ int jv_equal(jv, jv);
+ int jv_identical(jv, jv);
+ int jv_contains(jv, jv);
+ 
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
+ jv jv_invalid(void);
+-jv jv_invalid_with_msg(jv);
+-jv jv_invalid_get_msg(jv);
+-int jv_invalid_has_msg(jv);
+-
+ 
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap, j;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_invalid_with_msg(jv j);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap, j;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_invalid_get_msg(jv j);
++
++/*@
++assigns \result \from j;
++@*/
++int jv_invalid_has_msg(jv j);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
+ jv jv_null(void);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
+ jv jv_true(void);
+-jv jv_false(void);
+-jv jv_bool(int);
+ 
+-jv jv_number(double);
+-double jv_number_value(jv);
+-int jv_is_integer(jv);
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_false(void);
+ 
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap, x;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_bool(int x);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from x, _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_number(double x);
++
++/*@
++assigns \result \from j;
++@*/
++double jv_number_value(jv j);
++
++/*@
++assigns \result \from j;
++@*/
++int jv_is_integer(jv j);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
+ jv jv_array(void);
+-jv jv_array_sized(int);
+-int jv_array_length(jv);
+-jv jv_array_get(jv, int);
+-jv jv_array_set(jv, int, jv);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap, x;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_array_sized(int x);
++
++/*@
++assigns \result \from j;
++@*/
++int jv_array_length(jv j);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *j.u.ptr, _jv_heap \from j, x, _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j.u.ptr) == jv_refcount{Pre}(j.u.ptr) - 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != j.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_array_get(jv j, int x);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++requires \valid(j2.u.ptr);
++requires jv_refcount{Pre}(j2.u.ptr) > 0;
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *j.u.ptr, *j2.u.ptr, _jv_heap \from j, x, j2, _jv_heap;
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j2.u.ptr) >= 0;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != j.u.ptr && p != j2.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_array_set(jv j, int x, jv j2);
+ jv jv_array_append(jv, jv);
+ jv jv_array_concat(jv, jv);
+-jv jv_array_slice(jv, int, int);
+-jv jv_array_indexes(jv, jv);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *j.u.ptr, _jv_heap \from _jv_heap, x, y;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j.u.ptr) == jv_refcount{Pre}(j.u.ptr) - 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != j.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_array_slice(jv j, int x, int y);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++requires \valid(j2.u.ptr);
++requires jv_refcount{Pre}(j2.u.ptr) > 0;
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *j.u.ptr, *j2.u.ptr, _jv_heap \from j ,j2, _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j.u.ptr) == jv_refcount{Pre}(j.u.ptr) - 1;
++ensures jv_refcount{Post}(j2.u.ptr) >= 0;
++ensures jv_refcount{Post}(j2.u.ptr) == jv_refcount{Pre}(j2.u.ptr) - 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != j.u.ptr && p != j2.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_array_indexes(jv j, jv j2);
+ #define jv_array_foreach(a, i, x) \
+   for (int jv_len__ = jv_array_length(jv_copy(a)), i=0, jv_j__ = 1;     \
+        jv_j__; jv_j__ = 0)                                              \
+@@ -92,7 +310,7 @@ jv jv_array_indexes(jv, jv);
+ #define JV_ARRAY_9(e1,e2,e3,e4,e5,e6,e7,e8,e9) (jv_array_append(JV_ARRAY_8(e1,e2,e3,e4,e5,e6,e7,e8),e9))
+ #define JV_ARRAY_IDX(_1,_2,_3,_4,_5,_6,_7,_8,_9,NAME,...) NAME
+ #define JV_ARRAY(...) \
+-  JV_ARRAY_IDX(__VA_ARGS__, JV_ARRAY_9, JV_ARRAY_8, JV_ARRAY_7, JV_ARRAY_6, JV_ARRAY_5, JV_ARRAY_4, JV_ARRAY_3, JV_ARRAY_2, JV_ARRAY_1)(__VA_ARGS__)
++  JV_ARRAY_IDX(__VA_ARGS__, JV_ARRAY_9, JV_ARRAY_8, JV_ARRAY_7, JV_ARRAY_6, JV_ARRAY_5, JV_ARRAY_4, JV_ARRAY_3, JV_ARRAY_2, JV_ARRAY_1, dummy)(__VA_ARGS__)
+ 
+ #ifdef __GNUC__
+ #define JV_PRINTF_LIKE(fmt_arg_num, args_num) \
+@@ -101,19 +319,68 @@ jv jv_array_indexes(jv, jv);
+   __attribute__ ((__format__( __printf__, fmt_arg_num, 0)))
+ #endif
+ 
+-
+-jv jv_string(const char*);
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from s[..], _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_string(const char* s);
+ jv jv_string_sized(const char*, int);
+ jv jv_string_empty(int len);
+-int jv_string_length_bytes(jv);
+-int jv_string_length_codepoints(jv);
+-unsigned long jv_string_hash(jv);
+-const char* jv_string_value(jv);
++
++/*@
++assigns \result \from j;
++@*/
++int jv_string_length_bytes(jv j);
++
++/*@
++assigns \result \from j;
++@*/
++int jv_string_length_codepoints(jv j);
++
++/*@
++assigns \result \from j;
++@*/
++unsigned long jv_string_hash(jv j);
++
++/*@
++assigns \result \from j;
++ensures \valid(\result);
++@*/
++const char* jv_string_value(jv j);
+ jv jv_string_indexes(jv j, jv k);
+-jv jv_string_slice(jv j, int start, int end);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *j.u.ptr, _jv_heap \from _jv_heap, x, y;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j.u.ptr) == jv_refcount{Pre}(j.u.ptr) - 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != j.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_string_slice(jv j, int x, int y);
+ jv jv_string_concat(jv, jv);
+ jv jv_string_vfmt(const char*, va_list) JV_VPRINTF_LIKE(1);
+-jv jv_string_fmt(const char*, ...) JV_PRINTF_LIKE(1, 2);
++
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from s[..], _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_string_fmt(const char* s, ...) JV_PRINTF_LIKE(1, 2);
+ jv jv_string_append_codepoint(jv a, uint32_t c);
+ jv jv_string_append_buf(jv a, const char* buf, int len);
+ jv jv_string_append_str(jv a, const char* str);
+@@ -121,10 +388,60 @@ jv jv_string_split(jv j, jv sep);
+ jv jv_string_explode(jv j);
+ jv jv_string_implode(jv j);
+ 
++/*@
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, _jv_heap \from _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; p != \result.u.ptr ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
+ jv jv_object(void);
++
++/*@
++requires jv_refcount{Pre}(object.u.ptr) > 0;
++requires jv_refcount{Pre}(key.u.ptr) > 0;
++requires \valid(object.u.ptr);
++requires \valid(key.u.ptr);
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *object.u.ptr, *key.u.ptr, _jv_heap \from object, key, _jv_heap;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures jv_refcount{Post}(object.u.ptr) >= 0;
++ensures jv_refcount{Post}(key.u.ptr) >= 0;
++ensures jv_refcount{Post}(object.u.ptr) == jv_refcount{Pre}(object.u.ptr) - 1;
++ensures jv_refcount{Post}(key.u.ptr) == jv_refcount{Pre}(key.u.ptr) - 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != object.u.ptr && p != key.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
+ jv jv_object_get(jv object, jv key);
+-jv jv_object_set(jv object, jv key, jv value);
++
++/*@
++requires \valid(j.u.ptr);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++requires \valid(j2.u.ptr);
++requires jv_refcount{Pre}(j2.u.ptr) > 0;
++requires \valid(j3.u.ptr);
++requires jv_refcount{Pre}(j3.u.ptr) > 0;
++allocates \result.u.ptr;
++assigns \result, *\result.u.ptr, *j.u.ptr, *j2.u.ptr, *j3.u.ptr, _jv_heap \from j, j2, j3, _jv_heap;
++ensures jv_refcount{Post}(j.u.ptr) >= 0;
++ensures jv_refcount{Post}(j2.u.ptr) >= 0;
++ensures jv_refcount{Post}(j3.u.ptr) >= 0;
++//ensures \allocable{Pre}(\result.u.ptr);
++//ensures \freeable{Post}(\result.u.ptr);
++ensures \valid(\result.u.ptr);
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++ensures \forall struct jv_refcnt* p; (p != \result.u.ptr && p != j.u.ptr && p != j2.u.ptr && p != j3.u.ptr) ==> jv_refcount{Pre}(p) == jv_refcount{Post}(p);
++@*/
++jv jv_object_set(jv j, jv j2, jv j3);
+ jv jv_object_delete(jv object, jv key);
++
++/*@
++assigns \result \from object;
++@*/
+ int jv_object_length(jv object);
+ jv jv_object_merge(jv, jv);
+ jv jv_object_merge_recursive(jv, jv);
+@@ -144,26 +461,51 @@ jv jv_object_iter_value(jv, int);
+            : 0;                                                         \
+          jv_i__ = jv_object_iter_next(t, jv_i__))                       \
+ 
+-#define JV_OBJECT_1(k) (jv_object_set(jv_object(),(k),jv_null()))
++#define JV_OBJECT_1(k1) (jv_object_set(jv_object(),(k1),jv_null()))
+ #define JV_OBJECT_2(k1,v1) (jv_object_set(jv_object(),(k1),(v1)))
+-#define JV_OBJECT_3(k1,v1,k2) (jv_object_set(JV_OBJECT_2(k1,v1),k2,jv_null()))
+-#define JV_OBJECT_4(k1,v1,k2,v2) (jv_object_set(JV_OBJECT_2(k1,v1),k2,v2))
+-#define JV_OBJECT_5(k1,v1,k2,v2,k3) (jv_object_set(JV_OBJECT_4(k1,v1,k2,v2),k3,jv_null))
+-#define JV_OBJECT_6(k1,v1,k2,v2,k3,v3) (jv_object_set(JV_OBJECT_4(k1,v1,k2,v2),k3,v3))
+-#define JV_OBJECT_7(k1,v1,k2,v2,k3,v3,k4) (jv_object_set(JV_OBJECT_6(k1,v1,k2,v2,k3,v3),k4,jv_null()))
+-#define JV_OBJECT_8(k1,v1,k2,v2,k3,v3,k4,v4) (jv_object_set(JV_OBJECT_6(k1,v1,k2,v2,k3,v3),k4,v4))
+-#define JV_OBJECT_IDX(_1,_2,_3,_4,_5,_6,_7,_8,NAME,...) NAME
++#define JV_OBJECT_3(k1,v1,k2) (jv_object_set(JV_OBJECT_2((k1),(v1)),(k2),jv_null()))
++#define JV_OBJECT_4(k1,v1,k2,v2) (jv_object_set(JV_OBJECT_2((k1),(v1)),(k2),(v2)))
++#define JV_OBJECT_5(k1,v1,k2,v2,k3) (jv_object_set(JV_OBJECT_4((k1),(v1),(k2),(v2)),(k3),jv_null()))
++#define JV_OBJECT_6(k1,v1,k2,v2,k3,v3) (jv_object_set(JV_OBJECT_4((k1),(v1),(k2),(v2)),(k3),(v3)))
++#define JV_OBJECT_7(k1,v1,k2,v2,k3,v3,k4) (jv_object_set(JV_OBJECT_6((k1),(v1),(k2),(v2),(k3),(v3)),(k4),jv_null()))
++#define JV_OBJECT_8(k1,v1,k2,v2,k3,v3,k4,v4) (jv_object_set(JV_OBJECT_6((k1),(v1),(k2),(v2),(k3),(v3)),(k4),(v4)))
++#define JV_OBJECT_9(k1,v1,k2,v2,k3,v3,k4,v4,k5) \
++    (jv_object_set(JV_OBJECT_8((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4)),(k5),jv_null()))
++#define JV_OBJECT_10(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5) \
++    (jv_object_set(JV_OBJECT_8((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4)),(k5),(v5)))
++#define JV_OBJECT_11(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6) \
++    (jv_object_set(JV_OBJECT_10((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5)),(k6),jv_null()))
++#define JV_OBJECT_12(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6) \
++    (jv_object_set(JV_OBJECT_10((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5)),(k6),(v6)))
++#define JV_OBJECT_13(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7) \
++    (jv_object_set(JV_OBJECT_12((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5),(k6),(v6)),(k7),jv_null()))
++#define JV_OBJECT_14(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7) \
++    (jv_object_set(JV_OBJECT_12((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5),(k6),(v6)),(k7),(v7)))
++#define JV_OBJECT_15(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8) \
++    (jv_object_set(JV_OBJECT_14((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5),(k6),(v6),(k7),(v7)),(k8),jv_null()))
++#define JV_OBJECT_16(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8) \
++    (jv_object_set(JV_OBJECT_14((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5),(k6),(v6),(k7),(v7)),(k8),(v8)))
++#define JV_OBJECT_17(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9) \
++    (jv_object_set(JV_OBJECT_16((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5),(k6),(v6),(k7),(v7),(k8),(v8)),(k9),jv_null()))
++#define JV_OBJECT_18(k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9) \
++    (jv_object_set(JV_OBJECT_16((k1),(v1),(k2),(v2),(k3),(v3),(k4),(v4),(k5),(v5),(k6),(v6),(k7),(v7),(k8),(v8)),(k9),(v9)))
++#define JV_OBJECT_IDX(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,NAME,...) NAME
+ #define JV_OBJECT(...) \
+-  JV_OBJECT_IDX(__VA_ARGS__, JV_OBJECT_8, JV_OBJECT_7, JV_OBJECT_6, JV_OBJECT_5, JV_OBJECT_4, JV_OBJECT_3, JV_OBJECT_2, JV_OBJECT_1)(__VA_ARGS__)
++  JV_OBJECT_IDX(__VA_ARGS__, \
++                JV_OBJECT_18, JV_OBJECT_17, JV_OBJECT_16, JV_OBJECT_15, \
++                JV_OBJECT_14, JV_OBJECT_13, JV_OBJECT_12, JV_OBJECT_11, \
++                JV_OBJECT_10, JV_OBJECT_9, JV_OBJECT_8, JV_OBJECT_7,    \
++                JV_OBJECT_6, JV_OBJECT_5, JV_OBJECT_4, JV_OBJECT_3,     \
++                JV_OBJECT_2, JV_OBJECT_1)(__VA_ARGS__)
+ 
+ 
+ 
+-int jv_get_refcnt(jv);
++int jv_get_refcnt(jv j);
+ 
+ enum jv_print_flags {
+   JV_PRINT_PRETTY   = 1,
+   JV_PRINT_ASCII    = 2,
+-  JV_PRINT_COLOUR   = 4,
++  JV_PRINT_COLOR    = 4,
+   JV_PRINT_SORTED   = 8,
+   JV_PRINT_INVALID  = 16,
+   JV_PRINT_REFCOUNT = 32,
+diff --git a/jv_alloc.c b/jv_alloc.c
+old mode 100644
+new mode 100755
+diff --git a/jv_alloc.h b/jv_alloc.h
+old mode 100644
+new mode 100755
+diff --git a/jv_aux.c b/jv_aux.c
+old mode 100644
+new mode 100755
+index 1d2a325..3e16f55
+--- a/jv_aux.c
++++ b/jv_aux.c
+@@ -1,15 +1,75 @@
++/*
++This is the OLD version of JQ, before the bugfix.
++More specifically, revision 89897b4bcd7e2fbbe3fade3bd05fd39c712cc05f.
++The issue we are checking for is https://github.com/stedolan/jq/issues/896 .
++
++Expected failures:
++
++*_assert_separation: Seperation logic of allocation cannot be currently expressed in Frama-C, so asserts are used instead.
++*_assert_vac: The vaccuous test. If it proves, then there is a condradiction in logic allowing \false to be provable.
++*_assert_bug_correction: This is an assert to offset the bug https://bts.frama-c.com/view.php?id=2234 .
++jv_get_call_jv_free_pre_6: Despite successfully asserting the preconditons for jv_free directly above it, the preconditions for this function will not prove. Possible Frama-C bug.
++
++All other goals are expected to pass.
++
++Run this test with:
++
++frama-c jv_aux.c -no-frama-c-stdlib -cpp-command "gcc -C -E -I. -D__FC_MACHDEP_X86_64" -wp -wp-timeout 180 -wp-fct "parse_slice,jv_get,test_parse_slice,test_jv_get"
++
++Note that only two functions in this file were needed for the proof, parse_slice and jv_get, so all others were commented out.
++*/
++
++//define NDEBUG, so Frama-C doesn't try to prove its version of the assert macro
++#define NDEBUG
++
+ #include <string.h>
+ #include <stdlib.h>
+ #include <assert.h>
+ #include "jv_alloc.h"
+ 
++/*@
++requires j.u.ptr != slice.u.ptr;
++requires \valid(j.u.ptr);
++requires \valid(slice.u.ptr);
++requires \valid(pstart);
++requires \valid(pend);
++requires jv_refcount{Pre}(j.u.ptr) > 0;
++requires jv_refcount{Pre}(slice.u.ptr) > 0;
++ensures jv_refcount{Pre}(j.u.ptr) - 1 <= jv_refcount{Post}(j.u.ptr);
++ensures jv_refcount{Post}(j.u.ptr) <= jv_refcount{Pre}(j.u.ptr);
++ensures jv_refcount{Post}(slice.u.ptr) == jv_refcount{Pre}(slice.u.ptr) - 1;
++@*/
+ static int parse_slice(jv j, jv slice, int* pstart, int* pend) {
+-  // Array slices
+-  jv start_jv = jv_object_get(jv_copy(slice), jv_string("start"));
+-  jv end_jv = jv_object_get(slice, jv_string("end"));
++// Array slices
++  jv tmp1 = jv_string("start");
++  //@ assert separation: (j.u.ptr != tmp1.u.ptr);
++  //@ assert separation: (slice.u.ptr != tmp1.u.ptr);
++  jv tmp2 = jv_string("end");
++  //@ assert separation: (j.u.ptr != tmp2.u.ptr);
++  //@ assert separation: (slice.u.ptr != tmp2.u.ptr);
++  //@ assert separation: (tmp1.u.ptr != tmp2.u.ptr);
++  jv start_jv = jv_object_get(jv_copy(slice), tmp1);
++  //@ assert separation: (j.u.ptr != start_jv.u.ptr);
++  //@ assert separation: (slice.u.ptr != start_jv.u.ptr);
++  //@ assert separation: (tmp1.u.ptr != start_jv.u.ptr);
++  //@ assert separation: (tmp2.u.ptr != start_jv.u.ptr);
++  jv end_jv = jv_object_get(slice, tmp2);
++  //@ assert separation: (j.u.ptr != end_jv.u.ptr);
++  //@ assert separation: (slice.u.ptr != end_jv.u.ptr);
++  //@ assert separation: (tmp1.u.ptr != end_jv.u.ptr);
++  //@ assert separation: (tmp2.u.ptr != end_jv.u.ptr);
++  //@ assert separation: (start_jv.u.ptr != end_jv.u.ptr);
+   if (jv_get_kind(start_jv) == JV_KIND_NULL) {
+-    jv_free(start_jv);
+-    start_jv = jv_number(0);
++      jv_free(start_jv);
++      //@ assert jv_refcount(start_jv.u.ptr) >= 0;
++      start_jv = jv_number(0);
++      //@ assert separation: (j.u.ptr != start_jv.u.ptr);
++      //@ assert separation: (slice.u.ptr != start_jv.u.ptr);
++      //@ assert separation: (tmp1.u.ptr != start_jv.u.ptr);
++      //@ assert separation: (tmp2.u.ptr != start_jv.u.ptr);
++      //@ assert separation: (end_jv.u.ptr != start_jv.u.ptr);
++
++      //@ assert jv_refcount(start_jv.u.ptr) >= 0;
+   }
+   int len;
+   if (jv_get_kind(j) == JV_KIND_ARRAY)
+@@ -17,13 +77,27 @@ static int parse_slice(jv j, jv slice, int* pstart, int* pend) {
+   else
+     len = jv_string_length_codepoints(jv_copy(j));
+   if (jv_get_kind(end_jv) == JV_KIND_NULL) {
+-    jv_free(end_jv);
+-    end_jv = jv_number(len);
++      jv_free(end_jv);
++      //@ assert jv_refcount(end_jv.u.ptr) >= 0;
++      end_jv = jv_number(len);
++      //@ assert separation: (j.u.ptr != end_jv.u.ptr);
++      //@ assert separation: (slice.u.ptr != end_jv.u.ptr);
++      //@ assert separation: (tmp1.u.ptr != end_jv.u.ptr);
++      //@ assert separation: (tmp2.u.ptr != end_jv.u.ptr);
++      //@ assert separation: (start_jv.u.ptr != end_jv.u.ptr);
++
++      //@ assert jv_refcount(end_jv.u.ptr) >= 0;
+   }
+   if (jv_get_kind(start_jv) != JV_KIND_NUMBER ||
+       jv_get_kind(end_jv) != JV_KIND_NUMBER) {
+     jv_free(start_jv);
+     jv_free(end_jv);
++    //@ assert jv_refcount(j.u.ptr) >= 0;
++    //@ assert jv_refcount(slice.u.ptr) >= 0;
++    //@ assert jv_refcount(start_jv.u.ptr) >= 0;
++    //@ assert jv_refcount(end_jv.u.ptr) >= 0;
++    //@ assert jv_refcount(tmp1.u.ptr) >= 0;
++    //@ assert jv_refcount(tmp2.u.ptr) >= 0;
+     return 0;
+   } else {
+     double dstart = jv_number_value(start_jv);
+@@ -41,19 +115,42 @@ static int parse_slice(jv j, jv slice, int* pstart, int* pend) {
+     if (end > len) end = len;
+     if (end < start) end = start;
+     assert(0 <= start && start <= end && end <= len);
++    //@ assert jv_refcount(j.u.ptr) >= 0;
+     *pstart = start;
+     *pend = end;
++    //@ assert jv_refcount(j.u.ptr) >= 0;
++    //@ assert jv_refcount(slice.u.ptr) >= 0;
++    //@ assert jv_refcount(start_jv.u.ptr) >= 0;
++    //@ assert jv_refcount(end_jv.u.ptr) >= 0;
++    //@ assert jv_refcount(tmp1.u.ptr) >= 0;
++    //@ assert jv_refcount(tmp2.u.ptr) >= 0;
+     return 1;
+   }
+ }
+ 
++/*@
++requires t.u.ptr != k.u.ptr;
++requires \valid(t.u.ptr);
++requires \valid(k.u.ptr);
++requires jv_refcount{Pre}(t.u.ptr) > 0;
++requires jv_refcount{Pre}(k.u.ptr) > 0;
++ensures jv_refcount{Post}(t.u.ptr) >= 0;
++ensures jv_refcount{Post}(k.u.ptr) >= 0;
++ensures jv_refcount{Post}(\result.u.ptr) == 1;
++@*/
+ jv jv_get(jv t, jv k) {
+   jv v;
+   if (jv_get_kind(t) == JV_KIND_OBJECT && jv_get_kind(k) == JV_KIND_STRING) {
+     v = jv_object_get(t, k);
++    //@ assert separation: (v.u.ptr != t.u.ptr);
++    //@ assert separation: (v.u.ptr != k.u.ptr);
+     if (!jv_is_valid(v)) {
+-      jv_free(v);
+-      v = jv_null();
++        jv_free(v);
++        //@ assert jv_refcount(v.u.ptr) >= 0;
++        v = jv_null();
++        //@ assert separation: (v.u.ptr != t.u.ptr);
++        //@ assert separation: (v.u.ptr != k.u.ptr);
++        //@ assert jv_refcount(v.u.ptr) >= 0;
+     }
+   } else if (jv_get_kind(t) == JV_KIND_ARRAY && jv_get_kind(k) == JV_KIND_NUMBER) {
+     if(jv_is_integer(k)){
+@@ -61,33 +158,59 @@ jv jv_get(jv t, jv k) {
+       if (idx < 0)
+         idx += jv_array_length(jv_copy(t));
+       v = jv_array_get(t, idx);
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+       if (!jv_is_valid(v)) {
+-        jv_free(v);
+-        v = jv_null();
++          jv_free(v);
++          //@ assert jv_refcount(v.u.ptr) >= 0;
++          v = jv_null();
++          //@ assert separation: (v.u.ptr != t.u.ptr);
++          //@ assert separation: (v.u.ptr != k.u.ptr);
++          //@ assert jv_refcount(v.u.ptr) >= 0;
+       }
+     } else {
+       jv_free(t);
+       jv_free(k);
+       v = jv_null();
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+     }
+   } else if (jv_get_kind(t) == JV_KIND_ARRAY && jv_get_kind(k) == JV_KIND_OBJECT) {
++    //@ assert bug_correction: \valid(t.u.ptr) && \valid(k.u.ptr);
+     int start, end;
+     if (parse_slice(t, k, &start, &end)) {
++      //@ assert bug_correction: \valid(t.u.ptr) && \valid(k.u.ptr);
+       v = jv_array_slice(t, start, end);
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+     } else {
++      //@ assert bug_correction: \valid(t.u.ptr) && \valid(k.u.ptr);
+       v = jv_invalid_with_msg(jv_string_fmt("Start and end indices of an array slice must be numbers"));
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+       jv_free(t);
+     }
+   } else if (jv_get_kind(t) == JV_KIND_STRING && jv_get_kind(k) == JV_KIND_OBJECT) {
++    //@ assert bug_correction: \valid(t.u.ptr) && \valid(k.u.ptr);
+     int start, end;
+     if (parse_slice(t, k, &start, &end)) {
++      //@ assert bug_correction: \valid(t.u.ptr) && \valid(k.u.ptr);
+       v = jv_string_slice(t, start, end);
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+     } else {
++      //@ assert bug_correction: \valid(t.u.ptr) && \valid(k.u.ptr);
+       v = jv_invalid_with_msg(jv_string_fmt("Start and end indices of an string slice must be numbers"));
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
++
++      //@ assert should_satisfy_preconds: \valid(t.u.ptr) && jv_refcount(t.u.ptr) > 0;
+       jv_free(t);
+     }
+   } else if (jv_get_kind(t) == JV_KIND_ARRAY && jv_get_kind(k) == JV_KIND_ARRAY) {
+     v = jv_array_indexes(t, k);
++    //@ assert separation: (v.u.ptr != t.u.ptr);
++    //@ assert separation: (v.u.ptr != k.u.ptr);
+   } else if (jv_get_kind(t) == JV_KIND_NULL &&
+              (jv_get_kind(k) == JV_KIND_STRING ||
+               jv_get_kind(k) == JV_KIND_NUMBER ||
+@@ -95,27 +218,59 @@ jv jv_get(jv t, jv k) {
+     jv_free(t);
+     jv_free(k);
+     v = jv_null();
++    //@ assert separation: (v.u.ptr != t.u.ptr);
++    //@ assert separation: (v.u.ptr != k.u.ptr);
+   } else {
+-    /*
+-     * If k is a short string it's probably from a jq .foo expression or
+-     * similar, in which case putting it in the invalid msg may help the
+-     * user.  The length 30 is arbitrary.
+-     */
+     if (jv_get_kind(k) == JV_KIND_STRING && jv_string_length_bytes(jv_copy(k)) < 30) {
+       v = jv_invalid_with_msg(jv_string_fmt("Cannot index %s with string \"%s\"",
+                                             jv_kind_name(jv_get_kind(t)),
+                                             jv_string_value(k)));
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+     } else {
+       v = jv_invalid_with_msg(jv_string_fmt("Cannot index %s with %s",
+                                             jv_kind_name(jv_get_kind(t)),
+                                             jv_kind_name(jv_get_kind(k))));
++      //@ assert separation: (v.u.ptr != t.u.ptr);
++      //@ assert separation: (v.u.ptr != k.u.ptr);
+     }
+     jv_free(t);
+     jv_free(k);
+   }
++
++  //@ assert jv_refcount(v.u.ptr) >= 0;
++  //@ assert jv_refcount(t.u.ptr) >= 0;
++  //@ assert jv_refcount(k.u.ptr) >= 0;
+   return v;
+ }
+ 
++// test functions: These were included to assist checking of the behavior of the functions.
++
++void test_parse_slice() {
++    int ps, pe;
++    jv a,b;
++
++    a = jv_null();
++    b = jv_null();
++    //@ assert separation: a.u.ptr != b.u.ptr;
++    parse_slice(a, b, &ps, &pe);
++
++    //@ assert vac: \false;
++}
++
++void test_jv_get() {
++    jv a,b;
++
++    a = jv_null();
++    b = jv_null();
++    //@ assert separation: a.u.ptr != b.u.ptr;
++    jv_get(a, b);
++
++    //@ assert vac: \false;
++}
++
++// all below not needed for proof
++
+ jv jv_set(jv t, jv k, jv v) {
+   if (!jv_is_valid(v)) {
+     jv_free(t);
+@@ -614,4 +769,4 @@ jv jv_group(jv objects, jv keys) {
+   }
+   jv_mem_free(entries);
+   return ret;
+-}
++}
+\ No newline at end of file
+diff --git a/jv_dtoa.c b/jv_dtoa.c
+old mode 100644
+new mode 100755
+diff --git a/jv_dtoa.h b/jv_dtoa.h
+old mode 100644
+new mode 100755
+diff --git a/jv_file.c b/jv_file.c
+old mode 100644
+new mode 100755
+diff --git a/jv_parse.c b/jv_parse.c
+old mode 100644
+new mode 100755
+diff --git a/jv_print.c b/jv_print.c
+old mode 100644
+new mode 100755
+diff --git a/jv_unicode.c b/jv_unicode.c
+old mode 100644
+new mode 100755
+diff --git a/jv_unicode.h b/jv_unicode.h
+old mode 100644
+new mode 100755
+diff --git a/jv_utf8_tables.h b/jv_utf8_tables.h
+old mode 100644
+new mode 100755
+diff --git a/lexer.c b/lexer.c
+old mode 100644
+new mode 100755
+diff --git a/lexer.h b/lexer.h
+old mode 100644
+new mode 100755
+diff --git a/lexer.l b/lexer.l
+old mode 100644
+new mode 100755
+diff --git a/libm.h b/libm.h
+old mode 100644
+new mode 100755
+diff --git a/linker.c b/linker.c
+old mode 100644
+new mode 100755
+diff --git a/linker.h b/linker.h
+old mode 100644
+new mode 100755
+diff --git a/locfile.c b/locfile.c
+old mode 100644
+new mode 100755
+diff --git a/locfile.h b/locfile.h
+old mode 100644
+new mode 100755
+diff --git a/m4/ax_compare_version.m4 b/m4/ax_compare_version.m4
+old mode 100644
+new mode 100755
+diff --git a/m4/ax_prog_bison_version.m4 b/m4/ax_prog_bison_version.m4
+old mode 100644
+new mode 100755
+diff --git a/main.c b/main.c
+old mode 100644
+new mode 100755
+diff --git a/opcode_list.h b/opcode_list.h
+old mode 100644
+new mode 100755
+diff --git a/parser.c b/parser.c
+old mode 100644
+new mode 100755
+diff --git a/parser.h b/parser.h
+old mode 100644
+new mode 100755
+diff --git a/parser.y b/parser.y
+old mode 100644
+new mode 100755
+diff --git a/scripts/gen_utf8_tables.py b/scripts/gen_utf8_tables.py
+old mode 100644
+new mode 100755
+diff --git a/sha1sum.txt b/sha1sum.txt
+old mode 100644
+new mode 100755
+diff --git a/tests/jq.test b/tests/jq.test
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/.jq b/tests/modules/.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/a.jq b/tests/modules/a.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/b/b.jq b/tests/modules/b/b.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/c/c.jq b/tests/modules/c/c.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/c/d.jq b/tests/modules/c/d.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/data.json b/tests/modules/data.json
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/lib/jq/e/e.jq b/tests/modules/lib/jq/e/e.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/lib/jq/f.jq b/tests/modules/lib/jq/f.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/syntaxerror/syntaxerror.jq b/tests/modules/syntaxerror/syntaxerror.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/test_bind_order.jq b/tests/modules/test_bind_order.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/test_bind_order0.jq b/tests/modules/test_bind_order0.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/test_bind_order1.jq b/tests/modules/test_bind_order1.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/modules/test_bind_order2.jq b/tests/modules/test_bind_order2.jq
+old mode 100644
+new mode 100755
+diff --git a/tests/onig.supp b/tests/onig.supp
+old mode 100644
+new mode 100755
+diff --git a/tests/onig.test b/tests/onig.test
+old mode 100644
+new mode 100755
+diff --git a/tests/torture/input0.json b/tests/torture/input0.json
+old mode 100644
+new mode 100755
+diff --git a/util.c b/util.c
+old mode 100644
+new mode 100755
+diff --git a/util.h b/util.h
+old mode 100644
+new mode 100755
+-- 
+2.8.3
+

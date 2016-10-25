@@ -1,0 +1,51 @@
+From ce8bdb65cf9c6665192b37749d85175cac693873 Mon Sep 17 00:00:00 2001
+From: Joshua Robbins <crazybonesj@yahoo.com>
+Date: Tue, 25 Oct 2016 12:28:47 +0000
+Subject: [PATCH] Added ACSL annotations.
+
+---
+ src/util.c | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+ mode change 100644 => 100755 src/util.c
+
+diff --git a/src/util.c b/src/util.c
+old mode 100644
+new mode 100755
+index 105193c..3efe353
+--- a/src/util.c
++++ b/src/util.c
+@@ -372,6 +372,14 @@ int is_fnmatch(const char *filename) {
+     return (strpbrk(filename, fnmatch_chars) != NULL);
+ }
+ 
++/*@
++requires \valid(haystack+(start..end));
++requires \forall int i; start <= i <= end ==> valid_read_string(haystack[i]);
++requires valid_read_string(needle);
++requires start >= 0;
++requires end >= 0;
++requires end - start >= 0;
++@*/
+ int binary_search(const char *needle, char **haystack, int start, int end) {
+     int mid;
+     int rc;
+@@ -487,12 +495,13 @@ int is_named_pipe(const char *path, const struct dirent *d) {
+     return S_ISFIFO(s.st_mode);
+ }
+ 
++// Lines were commented out here so Frama-C can parse this file.
+ void ag_asprintf(char **ret, const char *fmt, ...) {
+     va_list args;
+     va_start(args, fmt);
+-    if (vasprintf(ret, fmt, args) == -1) {
+-        die("vasprintf returned -1");
+-    }
++//    if (vasprintf(ret, fmt, args) == -1) {
++//        die("vasprintf returned -1");
++//    }
+     va_end(args);
+ }
+ 
+-- 
+2.8.3
+

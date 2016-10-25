@@ -1,0 +1,60 @@
+From 882d1e1fa0a6190d19692cdc1e652ac34023f92c Mon Sep 17 00:00:00 2001
+From: Joshua Robbins <crazybonesj@yahoo.com>
+Date: Tue, 25 Oct 2016 12:27:30 +0000
+Subject: [PATCH] Added ACSL annotations.
+
+---
+ src/util.c | 17 +++++++++++++----
+ 1 file changed, 13 insertions(+), 4 deletions(-)
+ mode change 100644 => 100755 src/util.c
+
+diff --git a/src/util.c b/src/util.c
+old mode 100644
+new mode 100755
+index 3045bdf..d1fff5f
+--- a/src/util.c
++++ b/src/util.c
+@@ -372,6 +372,14 @@ int is_fnmatch(const char *filename) {
+     return (strpbrk(filename, fnmatch_chars) != NULL);
+ }
+ 
++/*@
++requires \valid(haystack+(start..end));
++requires \forall int i; start <= i <= end ==> valid_read_string(haystack[i]);
++requires valid_read_string(needle);
++requires start >= 0;
++requires end >= 0;
++requires end - start >= 0;
++@*/
+ int binary_search(const char *needle, char **haystack, int start, int end) {
+     int mid;
+     int rc;
+@@ -380,7 +388,7 @@ int binary_search(const char *needle, char **haystack, int start, int end) {
+         return -1;
+     }
+ 
+-    mid = (start + end) / 2; /* can screw up on arrays with > 2 billion elements */
++    mid = (start + end) / 2; /* can screw up on arrays with > 2 billion elements */ //TODO: it is here
+ 
+     rc = strcmp(needle, haystack[mid]);
+     if (rc < 0) {
+@@ -487,12 +495,13 @@ int is_named_pipe(const char *path, const struct dirent *d) {
+     return S_ISFIFO(s.st_mode);
+ }
+ 
++// Lines were commented out here so Frama-C can parse this file.
+ void ag_asprintf(char **ret, const char *fmt, ...) {
+     va_list args;
+     va_start(args, fmt);
+-    if (vasprintf(ret, fmt, args) == -1) {
+-        die("vasprintf returned -1");
+-    }
++//    if (vasprintf(ret, fmt, args) == -1) {
++//        die("vasprintf returned -1");
++//    }
+     va_end(args);
+ }
+ 
+-- 
+2.8.3
+

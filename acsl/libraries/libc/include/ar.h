@@ -1,0 +1,27 @@
+/*
+ * ar.h
+ *
+ *  Created on: Jul 18, 2016
+ *      Author: jrobbins
+ */
+
+#ifndef AR_H_
+#define AR_H_
+
+// This header is a GNU extension. Do not use for strictly POSIX-compliant work.
+
+#define ARMAG "!<arch>\n"
+#define SARMAG 8
+#define ARFMAG  "`\n"
+
+struct ar_hdr {
+    char ar_name[16];
+    char ar_date[12];
+    char ar_uid[6];
+    char ar_gid[6];
+    char ar_mode[8];
+    char ar_size[10];
+    char ar_fmag[2];
+};
+
+#endif /* AR_H_ */
