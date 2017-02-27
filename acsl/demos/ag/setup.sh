@@ -9,6 +9,10 @@ git fetch
 git reset --hard de7ee68c665f705ef0cdb7044301d2661a9291f9
 git am ../bugged.patch
 ./build.sh
+if [ $? != 0 ]; then
+    echo "Build failed, please check dependencies: libpcre3-dev, pkg-config, liblzma-dev"
+    exit $?
+fi
 cd ..
 
 echo "== SETTING UP FIXED VERSION =="
@@ -23,3 +27,4 @@ cd ..
 
 echo "=========================="
 echo "The repositories should now be set up. Execute run.sh to start the demo."
+
