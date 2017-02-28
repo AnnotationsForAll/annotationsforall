@@ -97,6 +97,7 @@ frama-c file.c -wp -no-frama-c-stdlib -cpp-extra-args="-I~/annotationsforall/acs
 
 # Testing ACSL Annotations
 All the ACSL tests can be executed using ACSLTest Project. It is an Eclipse project and contains JUnit tests. JUnit tests can be executed within Eclipse or by using Ant Script (ACSLTest/runJunitTests.xml)
+
 Some of the tests are configured to use Z3 as the prover. Z3 can be downloaded from [here](https://github.com/Z3Prover/z3/releases) and must be placed in the PATH so that testing system can find it. One can also place them under ACSLTest/tpbin directory as this directory is included in PATH while starting a Frama-c process.
 
 ## Import ACSLTest project in Eclipse.
