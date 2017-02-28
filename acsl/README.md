@@ -101,6 +101,7 @@ Some of the tests are configured to use Z3 as the prover. Z3 can be downloaded f
 
 ## Import ACSLTest project in Eclipse.
 To run the JUnit tests in Eclipse, you will have to import the project in Eclipse. 
+
 1.  Create a new directory (wherever you want) [called $WORKSPACE below] 
 2.  Launch Eclipse 
 3.  Choose the directory created above [$WORKSPACE] in the dialog asking for the workspace to use 
@@ -111,6 +112,7 @@ To run the JUnit tests in Eclipse, you will have to import the project in Eclips
 
 ## Running JUnit Tests in Eclipse
 ACSLTest project has a launcher to execute ACSLTest in Eclipse.
+
 1. In Eclipse, select "Run" menu and click "Run Configurations..." option.
 2. Expand JUnit option and select "ACSLTest" launcher.
 3. Few environment variables should be set to execute these test. Go to the "Environment" tab.
