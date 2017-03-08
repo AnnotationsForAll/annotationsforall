@@ -43,19 +43,19 @@ public class ACSLTest extends TestBase {
         }
         return this;
     }
-    
+
+    @Ignore
     @Test
     public void test_with_alt_ergo() throws Exception {
         TestUtility.acslTestCaseWithWhy(options, "alt-ergo");
     }
     
-    
+    @Ignore
     @Test
     public void test_with_z3() throws Exception {
         TestUtility.acslTestCaseWithWhy(options, "z3-4.4.0");
     }
     
-    @Ignore
     @Test
     public void test() throws Exception {
         TestUtility.acslTestCase(options);
