@@ -1,0 +1,247 @@
+--- coreutils-6.11/src/pr.c	2008-04-19 17:34:23.000000000 -0400
++++ ../coreutils-6.10/src/pr.c	2017-03-13 14:03:07.000000000 -0400
+@@ -1,5 +1,5 @@
+ /* pr -- convert text files for printing.
+-   Copyright (C) 88, 91, 1995-2008 Free Software Foundation, Inc.
++   Copyright (C) 88, 91, 1995-2007 Free Software Foundation, Inc.
+ 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+@@ -315,6 +315,7 @@
+ #include "system.h"
+ #include "error.h"
+ #include "hard-locale.h"
++#include "inttostr.h"
+ #include "mbswidth.h"
+ #include "quote.h"
+ #include "stat-time.h"
+@@ -411,6 +412,10 @@
+   };
+ 
+ typedef struct COLUMN COLUMN;
++/*@
++    // An incomplete definition of how a COLUMN is structured.
++    predicate valid_COLUMN{L}(COLUMN *p) = \separated(p, p->fp);
++ */
+ 
+ #define NULLCOL (COLUMN *)0
+ 
+@@ -591,6 +596,7 @@
+    input_position depends on where we are in the file.)
+    Important for converting tabs to spaces on input. */
+ static int input_position;
++/*@ predicate valid_input_position = (input_position >= 0); */
+ 
+ /* True if there were any failed opens so we can exit with nonzero
+    status.  */
+@@ -1746,6 +1752,9 @@
+    Empty columns will be formed by files with status ON_HOLD or CLOSED
+    when printing multiple files in parallel. */
+ 
++/*@
++    assigns \nothing;
++  @*/
+ static void
+ align_column (COLUMN *p)
+ {
+@@ -2026,6 +2035,9 @@
+   buff[buff_current++] = c;
+ }
+ 
++/*@
++    assigns \nothing;
++  */
+ static void
+ add_line_number (COLUMN *p)
+ {
+@@ -2079,6 +2091,10 @@
+ /* Print (or store) padding until the current horizontal position
+    is position. */
+ 
++/*@
++    assigns \nothing;
++  @*/
++
+ static void
+ pad_across_to (int position)
+ {
+@@ -2243,6 +2259,9 @@
+    We keep a count until we know that we'll be printing a line,
+    then print_sep_string() is called. */
+ 
++/*@
++    assigns \nothing;
++  @*/
+ static void
+ print_sep_string (void)
+ {
+@@ -2290,6 +2309,9 @@
+ /* Print (or store, depending on p->char_func) a clump of N
+    characters. */
+ 
++/*@
++    assigns \nothing;
++  @*/
+ static void
+ print_clump (COLUMN *p, int n, char *clump)
+ {
+@@ -2382,6 +2404,10 @@
+    Formfeeds are assumed to use up two lines at the beginning of
+    the page. */
+ 
++/*@
++    assigns \nothing; // NOT TRUE - output_position
++  @*/
++
+ static void
+ print_header (void)
+ {
+@@ -2434,6 +2460,14 @@
+    Return false if we exceed chars_per_column before reading
+    an end of line character, true otherwise. */
+ 
++/*@
++    requires valid_input_position;
++    requires file_is_open(p->fp);
++    requires valid_COLUMN(p);
++// TODO: abstract this:
++    //requires \separated(p, p->fp, &align_empty_cols, &spaces_not_printed, &padding_not_printed, &separators_not_printed);
++    ensures valid_input_position;
++*/
+ static bool
+ read_line (COLUMN *p)
+ {
+@@ -2450,14 +2484,19 @@
+ 
+   if (c == '\f' && p->full_page_printed)
+     if ((c = getc (p->fp)) == '\n')
++    {
++
+       c = getc (p->fp);
++    }
+   p->full_page_printed = false;
+ 
+   switch (c)
+     {
+     case '\f':
+       if ((c = getc (p->fp)) != '\n')
++      {
+ 	ungetc (c, p->fp);
++      }
+       FF_only = true;
+       if (print_a_header & !storing_columns)
+ 	{
+@@ -2495,6 +2534,10 @@
+ 	  /* We have to align empty columns at the beginning of a line. */
+ 	  k = separators_not_printed;
+ 	  separators_not_printed = 0;
++	  /*@
++	       loop invariant file_is_open(p->fp);
++	       loop invariant valid_input_position;
++	    @*/
+ 	  for (j = 1, q = column_vector; j <= k; ++j, ++q)
+ 	    {
+ 	      align_column (q);
+@@ -2527,9 +2570,15 @@
+ 
+   print_clump (p, chars, clump_buff);
+ 
++  /*@
++      loop invariant file_is_open(p->fp);
++      loop invariant valid_input_position;
++    @*/
+   for (;;)
+     {
++      //@ assert file_is_open(p->fp);
+       c = getc (p->fp);
++      //@ assert file_is_open(p->fp);
+ 
+       switch (c)
+ 	{
+@@ -2537,7 +2586,11 @@
+ 	  return true;
+ 	case '\f':
+ 	  if ((c = getc (p->fp)) != '\n')
++	  {
++		  //@ assert file_is_open(p->fp);
+ 	    ungetc (c, p->fp);
++		  //@ assert file_is_open(p->fp);
++	  }
+ 	  if (keep_FF)
+ 	    print_a_FF = true;
+ 	  hold_file (p);
+@@ -2645,6 +2698,12 @@
+    characters in clump_buff.  (e.g, the width of '\b' is -1, while the
+    number of characters is 1.) */
+ 
++/*@
++    requires valid_input_position; 
++    //assigns clump_buff[..];
++    assigns \nothing; // NOT TRUE
++    ensures valid_input_position;
++*/
+ static int
+ char_to_clump (char c)
+ {
+@@ -2659,12 +2718,19 @@
+   if (c == input_tab_char)
+     chars_per_c = chars_per_input_tab;
+ 
++  // This is required to validate the precondition for isprint (uc) in the else if below
++  //@ ghost int __gt_fc_int_arg = uc;
++  //@ assert (unsigned char)(__gt_fc_int_arg) == uc;
++
+   if (c == input_tab_char || c == '\t')
+     {
+       width = TAB_WIDTH (chars_per_c, input_position);
+ 
+       if (untabify_input)
+ 	{
++      /*@ loop invariant valid_input_position;
++          //loop assigns i, s[..];
++        @*/
+ 	  for (i = width; i; --i)
+ 	    *s++ = ' ';
+ 	  chars = width;
+@@ -2684,6 +2750,9 @@
+ 	  chars = 4;
+ 	  *s++ = '\\';
+ 	  sprintf (esc_buff, "%03o", uc);
++	  /*@ loop invariant valid_input_position;
++	      //loop assigns i, s[..] *s+(0..2);
++	   */
+ 	  for (i = 0; i <= 2; ++i)
+ 	    *s++ = esc_buff[i];
+ 	}
+@@ -2702,6 +2771,9 @@
+ 	      chars = 4;
+ 	      *s++ = '\\';
+ 	      sprintf (esc_buff, "%03o", uc);
++	      /*@ loop invariant valid_input_position;
++	          //loop assigns i, s[..];
++	        @*/
+ 	      for (i = 0; i <= 2; ++i)
+ 		*s++ = esc_buff[i];
+ 	    }
+@@ -2726,6 +2798,9 @@
+       *s = c;
+     }
+ 
++  // 6.10 BUG
++//  input_position += width;
++  // Initial fix:
+   /* Too many backspaces must put us in position 0 -- never negative.  */
+   if (width < 0 && input_position == 0)
+     {
+@@ -2733,9 +2808,9 @@
+       input_position = 0;
+     }
+   else if (width < 0 && input_position <= -width)
+-    input_position = 0;
++     input_position = 0;
+   else
+-    input_position += width;
++     input_position += width;
+ 
+   return chars;
+ }

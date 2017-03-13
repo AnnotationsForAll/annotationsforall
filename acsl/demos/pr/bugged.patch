@@ -1,0 +1,210 @@
+--- coreutils-6.10/src/pr.c	2007-11-25 08:23:31.000000000 -0500
++++ ../coreutils-6.10/src/pr.c	2017-03-13 15:18:44.000000000 -0400
+@@ -412,6 +412,10 @@
+   };
+ 
+ typedef struct COLUMN COLUMN;
++/*@
++    // An incomplete definition of how a COLUMN is structured.
++    predicate valid_COLUMN{L}(COLUMN *p) = \separated(p, p->fp);
++ */
+ 
+ #define NULLCOL (COLUMN *)0
+ 
+@@ -592,6 +596,7 @@
+    input_position depends on where we are in the file.)
+    Important for converting tabs to spaces on input. */
+ static int input_position;
++/*@ predicate valid_input_position = (input_position >= 0); */
+ 
+ /* True if there were any failed opens so we can exit with nonzero
+    status.  */
+@@ -1747,6 +1752,9 @@
+    Empty columns will be formed by files with status ON_HOLD or CLOSED
+    when printing multiple files in parallel. */
+ 
++/*@
++    assigns \nothing;
++  @*/
+ static void
+ align_column (COLUMN *p)
+ {
+@@ -2027,6 +2035,9 @@
+   buff[buff_current++] = c;
+ }
+ 
++/*@
++    assigns \nothing;
++  */
+ static void
+ add_line_number (COLUMN *p)
+ {
+@@ -2080,6 +2091,10 @@
+ /* Print (or store) padding until the current horizontal position
+    is position. */
+ 
++/*@
++    assigns \nothing;
++  @*/
++
+ static void
+ pad_across_to (int position)
+ {
+@@ -2244,6 +2259,9 @@
+    We keep a count until we know that we'll be printing a line,
+    then print_sep_string() is called. */
+ 
++/*@
++    assigns \nothing;
++  @*/
+ static void
+ print_sep_string (void)
+ {
+@@ -2291,6 +2309,9 @@
+ /* Print (or store, depending on p->char_func) a clump of N
+    characters. */
+ 
++/*@
++    assigns \nothing;
++  @*/
+ static void
+ print_clump (COLUMN *p, int n, char *clump)
+ {
+@@ -2383,6 +2404,10 @@
+    Formfeeds are assumed to use up two lines at the beginning of
+    the page. */
+ 
++/*@
++    assigns \nothing; // NOT TRUE - output_position
++  @*/
++
+ static void
+ print_header (void)
+ {
+@@ -2435,6 +2460,14 @@
+    Return false if we exceed chars_per_column before reading
+    an end of line character, true otherwise. */
+ 
++/*@
++    requires valid_input_position;
++    requires file_is_open(p->fp);
++    requires valid_COLUMN(p);
++// TODO: abstract this:
++    //requires \separated(p, p->fp, &align_empty_cols, &spaces_not_printed, &padding_not_printed, &separators_not_printed);
++    ensures valid_input_position;
++*/
+ static bool
+ read_line (COLUMN *p)
+ {
+@@ -2451,14 +2484,19 @@
+ 
+   if (c == '\f' && p->full_page_printed)
+     if ((c = getc (p->fp)) == '\n')
++    {
++
+       c = getc (p->fp);
++    }
+   p->full_page_printed = false;
+ 
+   switch (c)
+     {
+     case '\f':
+       if ((c = getc (p->fp)) != '\n')
++      {
+ 	ungetc (c, p->fp);
++      }
+       FF_only = true;
+       if (print_a_header & !storing_columns)
+ 	{
+@@ -2496,6 +2534,10 @@
+ 	  /* We have to align empty columns at the beginning of a line. */
+ 	  k = separators_not_printed;
+ 	  separators_not_printed = 0;
++	  /*@
++	       loop invariant file_is_open(p->fp);
++	       loop invariant valid_input_position;
++	    @*/
+ 	  for (j = 1, q = column_vector; j <= k; ++j, ++q)
+ 	    {
+ 	      align_column (q);
+@@ -2528,9 +2570,15 @@
+ 
+   print_clump (p, chars, clump_buff);
+ 
++  /*@
++      loop invariant file_is_open(p->fp);
++      loop invariant valid_input_position;
++    @*/
+   for (;;)
+     {
++      //@ assert file_is_open(p->fp);
+       c = getc (p->fp);
++      //@ assert file_is_open(p->fp);
+ 
+       switch (c)
+ 	{
+@@ -2538,7 +2586,11 @@
+ 	  return true;
+ 	case '\f':
+ 	  if ((c = getc (p->fp)) != '\n')
++	  {
++		  //@ assert file_is_open(p->fp);
+ 	    ungetc (c, p->fp);
++		  //@ assert file_is_open(p->fp);
++	  }
+ 	  if (keep_FF)
+ 	    print_a_FF = true;
+ 	  hold_file (p);
+@@ -2646,6 +2698,12 @@
+    characters in clump_buff.  (e.g, the width of '\b' is -1, while the
+    number of characters is 1.) */
+ 
++/*@
++    requires valid_input_position; 
++    //assigns clump_buff[..];
++    assigns \nothing; // NOT TRUE
++    ensures valid_input_position;
++*/
+ static int
+ char_to_clump (char c)
+ {
+@@ -2660,12 +2718,19 @@
+   if (c == input_tab_char)
+     chars_per_c = chars_per_input_tab;
+ 
++  // This is required to validate the precondition for isprint (uc) in the else if below
++  //@ ghost int __gt_fc_int_arg = uc;
++  //@ assert (unsigned char)(__gt_fc_int_arg) == uc;
++
+   if (c == input_tab_char || c == '\t')
+     {
+       width = TAB_WIDTH (chars_per_c, input_position);
+ 
+       if (untabify_input)
+ 	{
++      /*@ loop invariant valid_input_position;
++          //loop assigns i, s[..];
++        @*/
+ 	  for (i = width; i; --i)
+ 	    *s++ = ' ';
+ 	  chars = width;
+@@ -2685,6 +2750,9 @@
+ 	  chars = 4;
+ 	  *s++ = '\\';
+ 	  sprintf (esc_buff, "%03o", uc);
++	  /*@ loop invariant valid_input_position;
++	      //loop assigns i, s[..] *s+(0..2);
++	   */
+ 	  for (i = 0; i <= 2; ++i)
+ 	    *s++ = esc_buff[i];
+ 	}
+@@ -2703,6 +2771,9 @@
+ 	      chars = 4;
+ 	      *s++ = '\\';
+ 	      sprintf (esc_buff, "%03o", uc);
++	      /*@ loop invariant valid_input_position;
++	          //loop assigns i, s[..];
++	        @*/
+ 	      for (i = 0; i <= 2; ++i)
+ 		*s++ = esc_buff[i];
+ 	    }
