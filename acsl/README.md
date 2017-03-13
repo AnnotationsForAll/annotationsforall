@@ -96,24 +96,44 @@ frama-c file.c -wp -no-frama-c-stdlib -cpp-extra-args="-I~/annotationsforall/acs
 ```
 
 # Testing ACSL Annotations
+All the ACSL tests can be executed using ACSLTest Project. It is an Eclipse project and contains JUnit tests. JUnit tests can be executed within Eclipse or by using Ant Script (ACSLTest/runJunitTests.xml)
 
-There is a test script common for all ACSL tests, called `test.py`. The first argument is the library folder. Any other positional arguments represent a filter, so you can run only certain test files. For example, to run the tests for libc, run:
+Some of the tests are configured to use Z3 as the prover. Z3 can be downloaded from [here](https://github.com/Z3Prover/z3/releases) and must be placed in the PATH so that testing system can find it. One can also place them under ACSLTest/tpbin directory as this directory is included in PATH while starting a Frama-c process.
 
-```
-python test.py libraries/libc
-```
+## Import ACSLTest project in Eclipse.
+To run the JUnit tests in Eclipse, you will have to import the project in Eclipse. 
 
-This will run the tests and display the results. If a file's test failed, it will display a list of goals in the file that have failed.
+1.  Create a new directory (wherever you want) [called $WORKSPACE below] 
+2.  Launch Eclipse 
+3.  Choose the directory created above [$WORKSPACE] in the dialog asking for the workspace to use 
+4.  Choose File -> Import from the main menu 
+5.  Double-click General -> Existing Projects into Workspace
+6.  Enter $location of ACSLTest project as the root directory
+7.  Click 'Finish' (do NOT enable 'Copy projects into workspace') 
 
-There are three kinds of tests: runSuccess, runFailure, and testValues. runSuccess tests fail if any goal in them fails. runFailure tests fail if all goals in them pass. testValues tests fail if any goal fails, except for the vacuous test (an attempt to prove "false"), which must fail for testValues to pass.
+## Running JUnit Tests in Eclipse
+ACSLTest project has a launcher to execute ACSLTest in Eclipse.
 
-`test.py` also takes several flags. These are:
+1. In Eclipse, select "Run" menu and click "Run Configurations..." option.
+2. Expand JUnit option and select "ACSLTest" launcher.
+3. Few environment variables should be set to execute these test. Go to the "Environment" tab.
+4. Check that all the environment variables are correct for your system. 
+5. If "FRAMA_C_PATH" environment variable is not set, on Windows machine, we assume that it is "C:/cygwin/usr/local/bin/frama-c" and "/usr/local/bin/frama-c" on Linux machine.
+6. If "BASH_PATH" environment variable is not set, on Windows machine, we assume that it is "C:/cygwin/bin/bash" and "/usr/local/bin/bash" on Linux machine.
+7. After setting the environment variables, Click "Apply" to save the changes and Click "Run" to run the tests.
 
-| Short Name | Long Name | Description |
-|---|---|---|
-| -h | --help | Prints this help information. |
-| -a | --fc-args | The next argument will be passed to Frama-C as arguments. |
-| -e | --fc-exe | Specify the path to the Frama-C executable this script will execute. |
+## Running JUnit Tests in Eclipse via Ant Script
+1. Double click on the runJunitTest.xml file in the Eclipse
+2. Note that Ant script has two types of tests i.e. "ACSLTest-Sodium-report" and "ACSLTest-GTlibc-report"
+3. Navigate to any of these tests and check that "env key" are set correctly.
+4. Right click on the Ant file and select "Run As" option. 
+5. Select "Ant Build..." option and select the test that you want to run. Make sure "build" is also selected before selecting the test.
+6. Click on "Run" to start the tests.
+
+## Running JUnit Test outside Eclipse via Ant Script
+1. You can download Ant from https://ant.apache.org/bindownload.cgi. Make sure to download Ant that requires Java8.
+2. Set JAVA_HOME environment variable. 
+3. Go to the ACSLTest directory and execute ./run_ant.sh, this will start the "ACSLTest-GTlibc-report" tests.
 
 # ACSL Demos
 
