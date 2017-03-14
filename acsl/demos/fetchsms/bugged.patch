@@ -1,0 +1,167 @@
+--- openser-1.1.0-tls/modules/sms/libsms_modem.c	2005-06-13 12:47:45.000000000 -0400
++++ ../opensec-fetchsms/modules/sms/libsms_modem.c	2017-03-14 16:51:45.000000000 -0400
+@@ -40,6 +40,11 @@
+ 
+ 
+ 
++/*@
++    requires \valid(answer+(0..max-1));
++    assigns *(answer+(0..(max-1)));
++    ensures valid_string(answer);
++*/
+ int put_command( struct modem *mdm, char* cmd, int cmd_len, char* answer,
+ 											int max, int timeout,char* exp_end)
+ {
+--- openser-1.1.0-tls/modules/sms/libsms_getsms.c	2005-06-13 12:47:45.000000000 -0400
++++ ../opensec-fetchsms/modules/sms/libsms_getsms.c	2017-03-14 16:51:45.000000000 -0400
+@@ -129,11 +129,33 @@
+ }
+ 
+ 
+-
++/*@
++    // Valid
++    lemma ValidAtLeastToZero:
++        \forall char *s; valid_string(s) ==>
++        ( \exists integer i;
++             *(s+i) == 0
++             && \valid(s+(0..i))
++        );
++*/
++
++/*@ assigns s[0..];
++// unsupported...
++*/
++extern int sprintf(char * restrict s,
++    const char * restrict format, ...);
+ 
+ /* reads a SMS from the SIM-memory 1-10 */
+ /* returns number of SIM memory if successful */
+ /* on digicom the return value can be != sim */
++/*@
++    requires \valid(mdm);
++    requires \valid(pdu);
++    requires \separated(mdm, pdu);
++
++    requires \valid(pdu+(0..511));
++    requires \separated(mdm, pdu+(0..511));
++ */
+ int fetchsms(struct modem *mdm, int sim, char* pdu)
+ {
+ 	char command[16];
+@@ -146,50 +168,83 @@
+ 
+ 	// Digicom reports date+time only with AT+CMGL
+ 	if (mdm->mode==MODE_DIGICOM) {
+-		put_command(mdm,"AT+CMGL=\"ALL\"\r",14,answer,
++	    char tmp1[] = "AT+CMGL=\"ALL\"\r"; //XXX: modification for frama-c
++		put_command(mdm,tmp1,14,answer,
+ 			sizeof(answer),200,0);
+ 		/* search for beginning of the answer */
+-		position=strstr(answer,"+CMGL: ");
++		const char tmp_str_0[8] = "+CMGL: ";// XXX: FRAMA_C
++		//@ assert *((&tmp_str_0[0])+7) == 0;
++		//@ assert valid_string(&tmp_str_0[0]);
++		position=strstr(answer,tmp_str_0);
++		//@ assert size_unchanged_1_1: \valid(pdu+(0..511));
+ 		if (position) {
+ 			end=position+7;
+-			while (*end<'9' && *end>'0') end++;
++			/*@ loop assigns end; */
++			while (*end<'9' && *end>'0') end++;//XXX: RTE (dereference of position + 7)
+ 			if (end==position+7) {
+ 				foo = str2s(position+7,end-position-7,&err);
+ 				if (!err) {
+-					DBG("DEBUG:fetchsms:Found a message at memory %i\n",foo);
++				    char tmp2[] = "DEBUG:fetchsms:Found a message at memory %i\n"; //XXX: modification for frama-c
++					DBG(tmp2,foo);
+ 					sim=foo;
+ 				}
+ 				position = 0;
+ 			}
+ 			position = 0;
+ 		}
++		//@ assert position == 0;
++		//@ assert size_unchanged_1_2: \valid(pdu+(0..511));
+ 	} else {
+-		DBG("DEBUG:fetchsms:Trying to get stored message %i\n",sim);
+-		clen=sprintf(command,"AT+CMGR=%i\r",sim);
++	    char tmp1[] = "DEBUG:fetchsms:Trying to get stored message %i\n"; //XXX: modifications for frama-c
++	    char tmp2[] = "AT+CMGR=%i\r";
++	    //@ assert size_unchanged_2_0: \valid(pdu+(0..511));
++		DBG(tmp1,sim);
++		//@ assert size_unchanged_2_1: \valid(pdu+(0..511));
++		clen=sprintf(command,tmp2,sim);
++		//@ assert size_unchanged_2_2: \valid(pdu+(0..511));
+ 		put_command(mdm,command,clen,answer,sizeof(answer),50,0);
++		//@ assert size_unchanged_2_3: \valid(pdu+(0..511));
+ 		/* search for beginning of the answer */
+-		position=strstr(answer,"+CMGR:");
++		const char tmp_str_1[7] = "+CMGR:";//XXX: FRAMA-C
++		//@ assert valid_string(&tmp_str_1[0]);//XXX UNKNOWN - should be valid
++		position=strstr(answer,tmp_str_1);
++        //@ assert actual_size: ( position == 0 ) || (6<= strlen(position) < 512);
++		//XXX: the following is not actually entailed by the current definition
++		//@ assert well_formed_size: ( position == 0 ) || (7<= strlen(position) < 512); // Dependent on answer format, should be true if instead "+CMGR: " is used
++		//@ assert size_unchanged_2_4: \valid(pdu+(0..511));
+ 	}
++	//@ assert valid_string(&answer[0]);
++	//@ assert size_unchanged_3: \valid(pdu+(0..511));
+ 
+ 	/* keine SMS empfangen, weil Modem nicht mit +CMGR 
+ 	oder +CMGL geantwortet hat */
+ 	if (position==0)
+ 		return 0;
++	//@ assert \valid(position+7);
+ 	beginning=position+7;
++	//@ assert strlen(beginning) < 505;
+ 	/* keine SMS, weil Modem mit +CMGR: 0,,0 geantwortet hat */
+-	if (strstr(answer,",,0\r"))
++	const char tmp_str_2[5] = ",,0\r";
++	//@ assert *((&tmp_str_2[0])+4) == 0;
++	//@ assert valid_string(&tmp_str_2[0]);
++	if (strstr(answer,tmp_str_2))
+ 		return 0;
+ 
+ 	/* After that we have the PDU or ASCII string */
++	/*@ loop assigns end; */
+ 	for( end=beginning ; *end && *end!='\r' ; end++ );
+ 	if ( !*end || end-beginning<4)
+ 		return 0;
++	/*@ loop assigns end; */
+ 	for( end=end+1 ; *end && *end!='\r' ; end++ );
+ 	if ( !*end || end-beginning<4)
+ 		return 0;
+ 	/* Now we have the end of the PDU or ASCII string */
+ 	*end=0;
+-	strcpy(pdu,beginning);
++	//@ assert strlen(beginning) < 505; // Unchanged
++	//@ assert size_unchanged_final: \valid(pdu+(0..511)); // Only with precondition
++	//@ assert valid_string(beginning);
++	strcpy(pdu,beginning);  // Testing 'room_string' precondition
+ 
+ 	return sim;
+ }
+@@ -488,16 +543,19 @@
+ 
+ 
+ 
+-
++/*@
++    requires \valid(mdm);
++*/
+ int getsms( struct incame_sms *sms, struct modem *mdm, int sim)
+ {
+-	char   pdu[500];
++	char   pdu[512];
+ 	int    found;
+ 	int    ret;
+ 
+ 	found = fetchsms(mdm,sim,pdu);
+ 	if ( !found ) {
+-		LOG(L_ERR,"ERROR:getsms: unable to fetch sms %d!\n",sim);
++	    char tmp[] = "ERROR:getsms: unable to fetch sms %d!\n"; //XXX: modification for frama-c
++		LOG(L_ERR,tmp,sim);
+ 		return -1;
+ 	}
+ 
