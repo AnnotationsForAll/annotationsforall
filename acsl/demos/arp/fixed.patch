@@ -1,0 +1,263 @@
+--- busybox-1.6.2/libbb/getopt32.c	2007-11-26 01:54:36.000000000 -0500
++++ ../busybox-1.6.2/libbb/getopt32.c	2015-06-23 15:29:39.000000000 -0400
+@@ -530,3 +530,25 @@
+ 	option_mask32 = flags;
+ 	return flags;
+ }
++
++/*@
++	// SPECS for results flag & argument validity
++	ensures \result == option_mask32;
++	ensures (option_mask32 & (0x1)) <==> \valid(*protocol);
++	ensures (option_mask32 & (0x2)) <==> \valid(*protocol2);
++	ensures (option_mask32 & (0x4)) <==> \valid(*hw_type);
++	ensures (option_mask32 & (0x8)) <==> \valid(*hw_type2);
++//#define	ARP_OPT_i (0x10)
++//#define	ARP_OPT_a (0x20)
++//#define	ARP_OPT_d (0x40)
++//#define	ARP_OPT_n (0x80)
++//#define	ARP_OPT_D (0x100)
++//#define	ARP_OPT_s (0x200)
++//#define	ARP_OPT_v (0x400 * DEBUG)
++*/
++uint32_t
++getopt32_arp(int argc, char **argv, char *applet_opts, char **protocol, char **protocol2,
++		char **hw_type, char **hw_type2, char **device) {
++	return getopt32(argc, argv, "A:p:H:t:i:adnDsv", protocol, protocol2,
++			 hw_type, hw_type2, device);
++}
+--- busybox-1.6.2/libbb/error_msg_and_die.c	2007-11-26 01:54:36.000000000 -0500
++++ ../busybox-1.6.2/libbb/error_msg_and_die.c	2015-06-23 15:29:43.000000000 -0400
+@@ -36,6 +36,9 @@
+ 	exit(xfunc_error_retval);
+ }
+ 
++/*@
++	ensures \false;
++*/
+ void bb_error_msg_and_die(const char *s, ...)
+ {
+ 	va_list p;
+--- busybox-1.6.2/networking/arp.c	2007-11-26 01:54:31.000000000 -0500
++++ ../busybox-1.6.2/networking/arp.c	2017-03-14 13:52:46.000000000 -0400
+@@ -38,6 +38,42 @@
+ #define	ARP_OPT_D (0x100)	/* HW-address is devicename     */
+ #define	ARP_OPT_s (0x200)
+ #define	ARP_OPT_v (0x400 * DEBUG)	/* debugging output flag        */
++/*
++	axiomatic ARP_OPT_values {
++	logic unsigned ARP_OPT_A;
++	axiom ARP_OPT_A_value{L}: ARP_OPT_A == (0x1);
++
++	logic unsigned ARP_OPT_p;
++	axiom ARP_OPT_p_value{L}: ARP_OPT_p ==  (0x2);
++
++	logic unsigned ARP_OPT_H;
++	axiom ARP_OPT_H_value{L}: ARP_OPT_H ==  (0x4);
++
++	logic unsigned ARP_OPT_t;
++	axiom ARP_OPT_t_value{L}: ARP_OPT_t ==  (0x8);
++
++	logic unsigned ARP_OPT_i;
++	axiom ARP_OPT_i_value{L}: ARP_OPT_i ==  (0x10);
++
++	logic unsigned ARP_OPT_a;
++	axiom ARP_OPT_a_value{L}: ARP_OPT_a ==  (0x20);
++
++	logic unsigned ARP_OPT_d;
++	axiom ARP_OPT_d_value{L}: ARP_OPT_d ==  (0x40);
++
++	logic unsigned ARP_OPT_n;
++	axiom ARP_OPT_n_value{L}: ARP_OPT_n ==  (0x80);
++
++	logic unsigned ARP_OPT_D;
++	axiom ARP_OPT_D_value{L}: ARP_OPT_D ==  (0x100);
++
++	logic unsigned ARP_OPT_s;
++	axiom ARP_OPT_s_value{L}: ARP_OPT_s ==  (0x200);
++
++	logic unsigned ARP_OPT_v;
++	axiom ARP_OPT_v_value{L}: ARP_OPT_v ==  (0x400 * 0);
++	}
++*/
+ 
+ 
+ static const struct aftype *ap; /* current address family       */
+@@ -440,8 +476,13 @@
+ }
+ 
+ int arp_main(int argc, char **argv);
++/*@
++	requires argc >= 0;
++	requires \valid(argv+(0..argc-1));
++*/
+ int arp_main(int argc, char **argv)
+ {
++	// hwtypes set up correctly:
+ 	char *hw_type;
+ 	char *protocol;
+ 
+@@ -450,7 +491,7 @@
+ 	if (!ap)
+ 		bb_error_msg_and_die("%s: %s not supported", DFLT_AF, "address family");
+ 
+-	getopt32(argc, argv, "A:p:H:t:i:adnDsv", &protocol, &protocol,
++	getopt32_arp(argc, argv, "A:p:H:t:i:adnDsv", &protocol, &protocol,
+ 				 &hw_type, &hw_type, &device);
+ 	argv += optind;
+ 	if (option_mask32 & ARP_OPT_A || option_mask32 & ARP_OPT_p) {
+@@ -458,7 +499,9 @@
+ 		if (ap == NULL)
+ 			bb_error_msg_and_die("%s: unknown %s", protocol, "address family");
+ 	}
+-	if (option_mask32 & ARP_OPT_A || option_mask32 & ARP_OPT_p) {
++//	if (option_mask32 & ARP_OPT_A || option_mask32 & ARP_OPT_p) {
++	// XXX: FIX:
++	if (option_mask32 & ARP_OPT_H || option_mask32 & ARP_OPT_t) {
+ 		hw = get_hwtype(hw_type);
+ 		if (hw == NULL)
+ 			bb_error_msg_and_die("%s: unknown %s", hw_type, "hardware type");
+@@ -472,7 +515,8 @@
+ 
+ 	/* If no hw type specified get default */
+ 	if (!hw) {
+-		hw = get_hwtype(DFLT_HW);
++		char tmp_string[6] = DFLT_HW;//XXX: frama-c
++		hw = get_hwtype(tmp_string);
+ 		if (!hw)
+ 			bb_error_msg_and_die("%s: %s not supported", DFLT_HW, "hardware type");
+ 	}
+--- busybox-1.6.2/networking/interface.c	2007-11-26 01:54:31.000000000 -0500
++++ ../busybox-1.6.2/networking/interface.c	2015-06-23 15:30:07.000000000 -0400
+@@ -263,11 +263,17 @@
+ };
+ 
+ /* Check our protocol family table for this family. */
++/*@
++	assigns \nothing;
++*/
+ const struct aftype *get_aftype(const char *name)
+ {
+ 	const struct aftype *const *afp;
+ 
+ 	afp = aftypes;
++	/*@
++		loop assigns afp;
++	 */
+ 	while (*afp != NULL) {
+ 		if (!strcmp((*afp)->name, name))
+ 			return (*afp);
+@@ -831,6 +837,28 @@
+ #endif
+ 	NULL
+ };
++#if ENABLE_FEATURE_IPV6
++/*@
++	axiomatic HWTypes {
++	logic integer hwtypes_size{L};
++	axiom hwtypes_const_len{L}: hwtypes_size == 5;
++	}
++*/
++#else
++/*@
++	axiomatic HWTypes {
++	logic integer hwtypes_size{L};
++	axiom hwtypes_const_len{L}: hwtypes_size == 4;
++	}
++*/
++#endif
++/*@ // Not fully supported by frama-c kernel (yet)
++	global invariant hwtype_structure:
++		   \valid(hwtypes+(0..hwtypes_size))
++		&& \forall integer i; (0 <= i < hwtypes_size) ==> (\valid(*(hwtypes+i)))
++		&& \forall integer i; (0 <= i < hwtypes_size) ==> (\valid((*(hwtypes+i))->name))
++		&& *(hwtypes+hwtypes_size) == 0;
++*/
+ 
+ #ifdef IFF_PORTSEL
+ static const char *const if_port_text[] = {
+@@ -847,15 +875,38 @@
+ #endif
+ 
+ /* Check our hardware type table for this type. */
++
++/*@
++	requires valid_name: \valid(name);
++*/
+ const struct hwtype *get_hwtype(const char *name)
+ {
++	// XXX: Workaround for global invariant
++	//@ assert \valid(hwtypes+(0..hwtypes_size));
++	//@ assert \forall integer i; (0 <= i < hwtypes_size) ==> (\valid(*(hwtypes+i)));
++	//@ assert \forall integer i; (0 <= i < hwtypes_size) ==> (\valid((*(hwtypes+i))->name));
++	//@ assert *(hwtypes+hwtypes_size) == 0;
++
+ 	const struct hwtype *const *hwp;
+ 
+ 	hwp = hwtypes;
++	/**	Invariant to show that the argument name remains a valid string,
++	 *  and all iterated values of hwp have valid names.
++	 */
++	//@ ghost const struct hwtype *const *hwp_orrig = hwp;
++	//@ ghost int hwp_offset = 0;
++	/*@
++		loop assigns hwp, hwp_offset;
++		loop invariant \valid(name);
++		loop invariant hwp == hwp_orrig + hwp_offset;
++		loop invariant 0 <= hwp_offset <= hwtypes_size;
++		loop variant hwp_orrig+hwtypes_size - hwp;
++	 */
+ 	while (*hwp != NULL) {
+ 		if (!strcmp((*hwp)->name, name))
+ 			return (*hwp);
+ 		hwp++;
++		//@ ghost hwp_offset++;
+ 	}
+ 	return NULL;
+ }
+--- busybox-1.6.2/include/libbb.h	2007-11-26 01:54:38.000000000 -0500
++++ ../busybox-1.6.2/include/libbb.h	2015-06-23 15:29:49.000000000 -0400
+@@ -586,6 +586,8 @@
+ #endif
+ extern uint32_t option_mask32;
+ extern uint32_t getopt32(int argc, char **argv, const char *applet_opts, ...);
++// XXX: FRAMA-C
++extern uint32_t getopt32_arp(int argc, char **argv, char *applet_opts, char **protocol, char **protocol2, char **hw_type, char **hw_type2, char **device);
+ 
+ 
+ typedef struct llist_t {
+@@ -693,6 +695,7 @@
+ extern int interface_opt_a;
+ int display_interfaces(char *ifname);
+ const struct aftype *get_aftype(const char *name);
++
+ const struct hwtype *get_hwtype(const char *name);
+ const struct hwtype *get_hwntype(int type);
+ 
+--- busybox-1.6.2/procps/top.c	2007-11-26 01:54:39.000000000 -0500
++++ ../busybox-1.6.2/procps/top.c	2015-06-23 15:29:12.000000000 -0400
+@@ -429,10 +429,15 @@
+ }
+ #endif /* FEATURE_USE_TERMIOS */
+ 
+-
+ int top_main(int argc, char **argv);
++/*@
++	requires \valid(argv+(0..(argc-1)));
++	terminates \false;
++	ensures \true;
++ */
+ int top_main(int argc, char **argv)
+ {
++	//@ assert \valid(argv+(0..(argc-1)));
+ 	int count, lines, col;
+ 	unsigned interval = 5; /* default update rate is 5 seconds */
+ 	unsigned iterations = UINT_MAX; /* 2^32 iterations by default :) */
+@@ -448,6 +453,7 @@
+ 
+ 	/* do normal option parsing */
+ 	opt_complementary = "-";
++	//@ assert \valid(argv+(0..(argc-1)));
+ 	getopt32(argc, argv, "d:n:b", &sinterval, &siterations);
+ 	if (option_mask32 & 0x1) interval = xatou(sinterval); // -d
+ 	if (option_mask32 & 0x2) iterations = xatou(siterations); // -n
