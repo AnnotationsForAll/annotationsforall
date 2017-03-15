@@ -1,0 +1,120 @@
+--- src/cut.c	2017-03-15 14:31:00.163794450 -0400
++++ ../coreutils-6.10/src/cut.c	2017-03-15 15:45:22.000000000 -0400
+@@ -37,6 +37,13 @@
+ #include "quote.h"
+ #include "xstrndup.h"
+ 
++/*@ requires s>0;
++    ensures \valid((unsigned char *)\result+(0..(s-1)));
++*/
++extern void *xzalloc(size_t s);
++/*@ assigns *table; */
++extern void *hash_insert (Hash_table *table, void const *entry);
++
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ #define PROGRAM_NAME "cut"
+ 
+@@ -110,6 +117,17 @@
+     || (EOL_RANGE_START > 0 && K >= EOL_RANGE_START).  */
+ static unsigned char *printable_field;
+ 
++/*@
++    // Used for validating call to is_printable_field in set_fields
++    // Validates, not sure why this is not being deduced in set_fields
++    lemma Inner_Printable_Field_Validity:
++        (max_range_endpoint ==> \valid(printable_field+(0..(max_range_endpoint / 8)))) ==>
++        (max_range_endpoint ==> (((0 <= eol_range_start <= max_range_endpoint)) ==> \valid(printable_field+(eol_range_start / 8))));
++*/
++
++/* The name this program was run with. */
++char *program_name;
++
+ enum operating_mode
+   {
+     undefined_mode,
+@@ -239,6 +257,7 @@
+   exit (status);
+ }
+ 
++/*@ assigns *range_start_ht; */
+ static inline void
+ mark_range_start (size_t i)
+ {
+@@ -252,6 +271,7 @@
+   assert ((size_t) ent_from_table == i);
+ }
+ 
++/*@ assigns printable_field[i/8]; */
+ static inline void
+ mark_printable_field (size_t i)
+ {
+@@ -259,6 +279,9 @@
+   printable_field[n] |= (1 << (i % CHAR_BIT));
+ }
+ 
++/*@ requires \valid(printable_field+(i/8));
++    assigns \nothing;
++*/
+ static inline bool
+ is_printable_field (size_t i)
+ {
+@@ -494,8 +517,18 @@
+     }
+ 
+   max_range_endpoint = 0;
++  //@ ghost size_t max_range_endpoint_old = max_range_endpoint;
++  /*@
++    loop assigns i, max_range_endpoint, max_range_endpoint_old;
++    // max_range_endpoint only increases
++    loop invariant max_range_endpoint >= max_range_endpoint_old;
++    // max_range_endpoint is max of rp[..].hi
++    loop invariant \forall integer idx; (0 <= idx < i) ==> (max_range_endpoint >= rp[idx].hi);
++    loop variant n_rp - i;
++  */
+   for (i = 0; i < n_rp; i++)
+     {
++      //@ ghost max_range_endpoint_old = max_range_endpoint;
+       if (rp[i].hi > max_range_endpoint)
+         max_range_endpoint = rp[i].hi;
+     }
+@@ -510,6 +543,7 @@
+   qsort (rp, n_rp, sizeof (rp[0]), compare_ranges);
+ 
+   /* Set the array entries corresponding to integers in the ranges of RP.  */
++  /*@ loop assigns i, *range_start_ht, printable_field[0 .. (max_range_endpoint/8)]; */
+   for (i = 0; i < n_rp; i++)
+     {
+       /* Ignore any range that is subsumed by the to-EOL range.  */
+@@ -523,6 +557,7 @@
+           && !is_printable_field (rsi_candidate))
+         mark_range_start (rsi_candidate);
+ 
++      /*@ loop assigns j, printable_field[0 .. (max_range_endpoint/8)]; */
+       for (size_t j = rp[i].lo; j <= rp[i].hi; j++)
+         mark_printable_field (j);
+     }
+@@ -530,9 +565,14 @@
+   if (output_delimiter_specified
+       && !complement
+       && eol_range_start
++    //XXX: FIX FROM be7932e863de07c4c7e4fc3c1db3eb6d04ba9af5
++    //XXX: -
++//      && max_range_endpoint && !is_printable_field (eol_range_start))
++    //XXX: +
+       && max_range_endpoint
+       && (max_range_endpoint < eol_range_start
+           || !is_printable_field (eol_range_start)))
++    //XXX: END FIX
+     mark_range_start (eol_range_start);
+ 
+   free (rp);
+--- gnulib/lib/verify.h	2017-03-15 14:33:12.498916183 -0400
++++ ../coreutils-6.10/gnulib/lib/verify.h	2017-03-15 11:03:07.000000000 -0400
+@@ -178,7 +178,6 @@
+ # elif defined _GL_HAVE__STATIC_ASSERT
+ #  define _GL_VERIFY_TYPE(R, DIAGNOSTIC) \
+      struct {                                   \
+-       _Static_assert (R, DIAGNOSTIC);          \
+        int _gl_dummy;                          \
+      }
+ # else
