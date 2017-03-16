@@ -32,11 +32,11 @@ Additionally, a loop inside _get_hwtype_ was annotated with invariants and a var
 loop assigns hwp, hwp_offset;
 loop invariant \valid(name); 
 loop invariant hwp == hwp_orrig + hwp_offset;
-loop invariant 0 &lt;= hwp_offset &lt;= hwtypes_size;
+loop invariant 0 <= hwp_offset <= hwtypes_size;
 loop variant hwp_orrig+hwtypes_size - hwp;
 */
 while (*hwp != NULL) {
-  if (!strcmp((*hwp)-&gt;name, name))
+  if (!strcmp((*hwp)->name, name))
     return (*hwp);
   hwp++; 
   //@ ghost hwp_offset++;
@@ -59,8 +59,8 @@ Next, a global invariant was defined showing some properties of the structure.
 /*@
 global invariant hwtype_structure:
 \valid(hwtypes+(0..hwtypes_size))
-&& \forall integer i; (0 &lt;= i &lt; hwtypes_size) ==&gt; (\valid(*(hwtypes+i)))
-&& \forall integer i; (0 &lt;= i &lt; hwtypes_size) =&gt; (\valid((*(hwtypes+i))-&gt;name))
+&& \forall integer i; (0 <= i < hwtypes_size) ==>; (\valid(*(hwtypes+i)))
+&& \forall integer i; (0 <= i < hwtypes_size) ==> (\valid((*(hwtypes+i))->name))
 && *(hwtypes+hwtypes_size) 0;
 */
 ```
@@ -127,10 +127,10 @@ Added function _getopt32_arp_ which proxies to <em>getopt32 </em>specifically fo
 ```
 /*@
    ensures \result == option_mask32;
-   ensures (option_mask32 & (0x1)) &lt;==&gt; \valid(*protocol); // ARP_OPT_A
-   ensures (option_mask32 & (0x2)) &lt;==&gt; \valid(*protocol2); // ARP_OPT_p
-   ensures (option_mask32 & (0x4)) &lt;==&gt; \valid(*hw_type); // ARP_OPT_H
-   ensures (option_mask32 & (0x8)) &lt;==&gt; \valid(*hw_type2); // ARP_OPT_t
+   ensures (option_mask32 & (0x1)) <==> \valid(*protocol); // ARP_OPT_A
+   ensures (option_mask32 & (0x2)) <==> \valid(*protocol2); // ARP_OPT_p
+   ensures (option_mask32 & (0x4)) <==> \valid(*hw_type); // ARP_OPT_H
+   ensures (option_mask32 & (0x8)) <==> \valid(*hw_type2); // ARP_OPT_t
 */
 ```
 
@@ -138,8 +138,8 @@ Because global invariants are not well supported, the property was simply assert
 
 ```
 //@ assert \valid(hwtypes+(0..hwtypes_size));
-//@ assert \forall integer i; (0 &lt;= i &lt; hwtypes_size) ==&gt; (\valid(*(hwtypes+i)));
-//@ assert \forall integer i; (0 &lt;= i &lt; hwtypes_size) ==&gt; (\valid((*(hwtypes+i))-&gt;name));
+//@ assert \forall integer i; (0 <= i < hwtypes_size) ==> (\valid(*(hwtypes+i)));
+//@ assert \forall integer i; (0 <= i < hwtypes_size) ==> (\valid((*(hwtypes+i))->name));
 //@ assert *(hwtypes+hwtypes_size) == 0;
 ```
 ## <a name="References"></a> References
