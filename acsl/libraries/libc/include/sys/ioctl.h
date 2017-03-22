@@ -23,7 +23,7 @@
 #ifndef FC_IOCTL
 #define FC_IOCTL
 
-#include "../stropts.h"
+//#include "../stropts.h"
 #include "../termios.h"
 
 /* Routing table calls.  */
@@ -137,5 +137,7 @@ struct winsize {
     unsigned short ws_xpixel;
     unsigned short ws_ypixel;
 };
+
+int ioctl(int fd, unsigned long request, ...);
 
 #endif

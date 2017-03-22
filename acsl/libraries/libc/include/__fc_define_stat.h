@@ -53,11 +53,11 @@ struct stat {
   blkcnt_t  st_blocks;
 
   // These are not part of the spec, but exist in practice - usually a macro for st_atime etc.
-  time_t    st_atim;
+  struct timespec   st_atim;
   unsigned long int st_atime_usec;
-  time_t    st_mtim;
+  struct timespec   st_mtim;
   unsigned long int st_mtime_usec;
-  time_t    st_ctim;
+  struct timespec   st_ctim;
   unsigned long int st_ctime_usec;
 };
 

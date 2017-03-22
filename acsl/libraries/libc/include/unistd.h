@@ -42,7 +42,7 @@
 #include "getopt.h"
 #include "crypt.h"
 #include "limits.h"
-#include "sys/sysinfo.h"
+//#include "sys/sysinfo.h"
 #include "sys/acct.h"
 
 /* Standard file descriptors.  */
@@ -664,7 +664,7 @@ assigns \result, errno \from delta;
 ensures \result != ((void*)-1) ==> \valid(((char*)\result)+(0..delta));
 ensures \result == ((void*)-1) ? errno != 0 : errno == \old(errno);
 */
-void *sbrk (ptrdiff_t delta);
+void *sbrk (intptr_t delta);
 
 /*@
 assigns \result;

@@ -33,7 +33,7 @@
 #include "../__fc_define_pid_t.h"
 #include "../__fc_define_uid_and_gid.h"
 #include "../signal.h"
-#include "resource.h"
+
 
 typedef enum __FC_IDTYPE_T {
     P_ALL,
@@ -84,6 +84,9 @@ union wait {
     int w_stopsig;
 };
 
+#if defined __USE_BSD || defined __USE_XOPEN_EXTENDED
+#include "resource.h"
+
 /*@
 requires status_ptr != \null ==> \valid(status_ptr);
 requires usage != \null ==> \valid(usage);
@@ -99,6 +102,8 @@ assigns \result, *status_ptr, *usage \from pid, options;
 ensures \result == -1 || \result == 0;
 */
 pid_t wait4(pid_t pid, union wait *status_ptr, int options, struct rusage *usage);
+
+#endif
 
 #endif
 

@@ -1,6 +1,7 @@
 #ifndef __GT_FC_DEFINE_ALT_TYPES
 #define __GT_FC_DEFINE_ALT_TYPES
 #include "__fc_machdep.h"
+#include "features.h"
 
 __BEGIN_DECLS
 
