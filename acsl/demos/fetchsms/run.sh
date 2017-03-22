@@ -11,6 +11,3 @@ frama-c -cpp-command="gcc -g -O9 -minline-all-stringops -mtune=opteron -DNAME='o
 
 cd ../..
 
-echo "=== FIXED VERSION ==="
-
-echo "=== END ==="

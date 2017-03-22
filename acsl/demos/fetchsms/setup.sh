@@ -9,15 +9,10 @@ wait
 tar -xvzf openser-1.1.0-tls_src.tar.gz
 wait
 cd openser-1.1.0-tls
-patch -p1 < ../../fetchsms.diff
+patch -p1 < ../../bugged.patch
 make
 cd ../..
 
-echo "== SETTING UP FIXED VERSION =="
-mkdir fixed
-cd fixed
-
-cd ../..
 
 echo "=========================="
 echo "The repositories should now be set up. Execute run.sh to start the demo."
