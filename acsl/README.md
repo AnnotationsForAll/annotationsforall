@@ -142,3 +142,10 @@ The directory `demos` contains several examples of Frama-C in action, in conjunc
 Demos have two parts- the "bugged" and "fixed" parts. This represents the results of Frama-C's execution on the codebase before and after a bug fix was made. Notice how Frama-C does not prove all goals for the "before" case, but does for the "after" case.
 
 Look inside each demo directory for more information about that specific demo.
+
+# Other ACSL Annotations
+
+Toccata Examples: http://toccata.lri.fr/gallery/frama-c.en.html
+Verification of some klibc implementations: http://link.springer.com/chapter/10.1007/978-3-319-06200-6_29
+ACSL by Example: https://cdn0.scrvt.com/fokus/c8efcdaac330d718/6cc5d3fc9481/ACSL-by-Example_14_1_0.pdf
+
