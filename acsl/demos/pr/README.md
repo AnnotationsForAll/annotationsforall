@@ -31,7 +31,7 @@ A global variable _input_position_ is used to track the horizontal position in a
 A predicate was defined to represent a invariant for _input_position_.
 
 ```
-/*@ predicate valid_input_position = (input_position > 0); */
+/*@ predicate valid_input_position = (input_position >= 0); */
 ```
 
 This predicate was then added as a pre and post condition to the function _char_to_clump_, which is responsible for converting characters to the proper format, and incrementing or decrementing _input_position_ by the width.
